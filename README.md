@@ -1,6 +1,6 @@
-[index (8).html](https://github.com/user-attachments/files/28978996/index.8.html)
+[index (9).html](https://github.com/user-attachments/files/28979020/index.9.html)
 <!DOCTYPE html>
-<html lang="pt-BR" style="background:#1a2744">
+<html lang="pt-BR" style="background:#1a2730">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -818,99 +818,191 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   }
 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
+  // ─── API KEY FMP (gratuita — 250 req/dia) ───────────────────────────────────
+  // Crie conta em financialmodelingprep.com e cole sua chave aqui:
+  const FMP_KEY = 'demo';  // 'demo' funciona para teste com poucas empresas
+
   async function loadData() {
     allData = [];
     currentPage = 1;
     document.getElementById('tbody').innerHTML = '';
     document.getElementById('loading-msg').style.display = 'none';
-    const prog = document.getElementById('load-progress');
+    const prog     = document.getElementById('load-progress');
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
+    progText.textContent = 'Iniciando carregamento...';
+    progFill.style.width = '0%';
 
-    function parseQuote(q) {
-      if (!q || !q.symbol) return null;
-      const fcfPerShare = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
-      const s = {
-        symbol: q.symbol, name: q.shortName||q.symbol, sector: q.sector||'Unknown',
-        price: q.regularMarketPrice||0, change1d: q.regularMarketChangePercent||0,
-        marketCap: q.marketCap||0, pe: q.trailingPE||null, pb: q.priceToBook||null,
-        ps: q.priceToSalesTrailing12Months||null, evEbitda: q.enterpriseToEbitda||null,
-        roe: q.returnOnEquity||null, roa: q.returnOnAssets||null,
-        grossMargin: q.grossMargins||null, netMargin: q.netMargins||null, opMargin: q.operatingMargins||null,
-        debtEq: q.debtToEquity||null, currentRatio: q.currentRatio||null,
-        eps: q.trailingEps||null, fcfPerShare, divYield: q.dividendYield||null,
-        avgVol: q.averageVolume||null, peg: q.pegRatio||null,
-        growthRate: q.revenueGrowth || 0.08
-      };
-      s.fairPrice = calcFair(s);
-      return s;
-    }
-
+    // ── helpers ──────────────────────────────────────────────────────────────
     function updateSectors() {
-      const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
+      const secs = [...new Set(allData.map(s=>s.sector).filter(x=>x&&x!=='Unknown'))].sort();
       const sel = document.getElementById('filter-sector');
       const cur = sel.value;
       sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-      sel.value = cur;
+      if (cur) sel.value = cur;
     }
 
-    // Usa JSONP — funciona sem CORS em qualquer browser
-    function fetchYahooJSONP(tickers) {
-      return new Promise((resolve) => {
-        const id = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-        const timeout = setTimeout(() => {
-          delete window[id];
-          resolve([]);
-        }, 10000);
-
-        window[id] = function(data) {
-          clearTimeout(timeout);
-          delete window[id];
-          const results = data?.quoteResponse?.result || [];
-          resolve(results);
-        };
-
-        const syms = tickers.join('%2C');
-        const fields = 'shortName%2CregularMarketPrice%2CregularMarketChangePercent%2CmarketCap%2CtrailingPE%2CpriceToBook%2CpriceToSalesTrailing12Months%2CenterpriseToEbitda%2CreturnOnEquity%2CreturnOnAssets%2CgrossMargins%2CnetMargins%2CoperatingMargins%2CdebtToEquity%2CcurrentRatio%2CtrailingEps%2CfreeCashflow%2CsharesOutstanding%2CdividendYield%2CaverageVolume%2CpegRatio%2CrevenueGrowth%2Csector';
-        const script = document.createElement('script');
-        script.src = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}&callback=${id}`;
-        script.onerror = () => { clearTimeout(timeout); delete window[id]; resolve([]); };
-        document.head.appendChild(script);
-        setTimeout(() => { try { document.head.removeChild(script); } catch(e){} }, 11000);
-      });
+    function updateUI() {
+      updateSectors();
+      renderTable();
+      document.getElementById('count-badge').textContent = allData.length + ' / ' + TICKERS.length + ' empresas';
     }
 
+    // ── Método 1: Financial Modeling Prep (CORS nativo, gratuito) ────────────
+    async function fetchFMP(tickers) {
+      try {
+        const syms = tickers.join(',');
+        const url  = `https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${FMP_KEY}`;
+        const r    = await fetch(url);
+        if (!r.ok) return null;
+        const data = await r.json();
+        if (!Array.isArray(data) || data.length === 0) return null;
+        return data.map(q => ({
+          symbol:     q.symbol,
+          name:       q.name,
+          sector:     null,          // FMP /quote não traz setor — busca abaixo
+          price:      q.price||0,
+          change1d:   q.changesPercentage||0,
+          marketCap:  q.marketCap||0,
+          pe:         q.pe||null,
+          pb:         q.priceToBookRatio||null,
+          ps:         q.priceToSalesRatio||null,
+          evEbitda:   q.enterpriseValueMultiple||null,
+          roe:        q.returnOnEquityTTM ? q.returnOnEquityTTM/100 : null,
+          roa:        q.returnOnAssetsTTM ? q.returnOnAssetsTTM/100 : null,
+          grossMargin:q.grossProfitMarginTTM||null,
+          netMargin:  q.netProfitMarginTTM||null,
+          opMargin:   q.operatingProfitMarginTTM||null,
+          debtEq:     q.debtToEquityRatio||null,
+          currentRatio:q.currentRatio||null,
+          eps:        q.eps||null,
+          fcfPerShare:q.freeCashFlowPerShareTTM||null,
+          divYield:   q.dividendYield ? q.dividendYield/100 : null,
+          avgVol:     q.avgVolume||null,
+          peg:        null,
+          growthRate: 0.08
+        }));
+      } catch(e) { return null; }
+    }
+
+    // ── Método 2: Yahoo Finance via corsproxy.io ──────────────────────────────
+    async function fetchYahoo(tickers) {
+      try {
+        const syms   = tickers.join(',');
+        const yahoo  = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${syms}&range=1d&interval=1d`;
+        const quote  = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}`;
+        const proxy  = 'https://corsproxy.io/?';
+        const r      = await fetch(proxy + encodeURIComponent(quote));
+        if (!r.ok) return null;
+        const json   = await r.json();
+        const list   = json?.quoteResponse?.result;
+        if (!list || list.length === 0) return null;
+        return list.map(q => {
+          const fcf = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
+          return {
+            symbol:     q.symbol,
+            name:       q.shortName||q.symbol,
+            sector:     q.sector||null,
+            price:      q.regularMarketPrice||0,
+            change1d:   q.regularMarketChangePercent||0,
+            marketCap:  q.marketCap||0,
+            pe:         q.trailingPE||null,
+            pb:         q.priceToBook||null,
+            ps:         q.priceToSalesTrailing12Months||null,
+            evEbitda:   q.enterpriseToEbitda||null,
+            roe:        q.returnOnEquity||null,
+            roa:        q.returnOnAssets||null,
+            grossMargin:q.grossMargins||null,
+            netMargin:  q.netMargins||null,
+            opMargin:   q.operatingMargins||null,
+            debtEq:     q.debtToEquity||null,
+            currentRatio:q.currentRatio||null,
+            eps:        q.trailingEps||null,
+            fcfPerShare:fcf,
+            divYield:   q.dividendYield||null,
+            avgVol:     q.averageVolume||null,
+            peg:        q.pegRatio||null,
+            growthRate: q.revenueGrowth||0.08
+          };
+        });
+      } catch(e) { return null; }
+    }
+
+    // ── Método 3: Yahoo via allorigins ────────────────────────────────────────
+    async function fetchYahooAlt(tickers) {
+      try {
+        const syms  = tickers.join(',');
+        const quote = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}`;
+        const r     = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(quote));
+        if (!r.ok) return null;
+        const wrap  = await r.json();
+        if (!wrap.contents) return null;
+        const json  = JSON.parse(wrap.contents);
+        const list  = json?.quoteResponse?.result;
+        if (!list || list.length === 0) return null;
+        return list.map(q => {
+          const fcf = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
+          return {
+            symbol:q.symbol, name:q.shortName||q.symbol, sector:q.sector||null,
+            price:q.regularMarketPrice||0, change1d:q.regularMarketChangePercent||0,
+            marketCap:q.marketCap||0, pe:q.trailingPE||null, pb:q.priceToBook||null,
+            ps:q.priceToSalesTrailing12Months||null, evEbitda:q.enterpriseToEbitda||null,
+            roe:q.returnOnEquity||null, roa:q.returnOnAssets||null,
+            grossMargin:q.grossMargins||null, netMargin:q.netMargins||null, opMargin:q.operatingMargins||null,
+            debtEq:q.debtToEquity||null, currentRatio:q.currentRatio||null,
+            eps:q.trailingEps||null, fcfPerShare:fcf,
+            divYield:q.dividendYield||null, avgVol:q.averageVolume||null, peg:q.pegRatio||null,
+            growthRate:q.revenueGrowth||0.08
+          };
+        });
+      } catch(e) { return null; }
+    }
+
+    // ── Loop principal — tenta os 3 métodos em sequência ─────────────────────
     const BATCH = 10;
     const batches = [];
     for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
 
+    let successMethod = null; // guarda qual método funcionou primeiro
+
     for (let b = 0; b < batches.length; b++) {
       const pct = Math.round((b / batches.length) * 100);
       progText.textContent = `Carregando... ${pct}% — ${allData.length} empresas prontas`;
-      progFill.style.width = pct + '%';
+      progFill.style.width  = pct + '%';
 
-      const results = await fetchYahooJSONP(batches[b]);
-      for (const q of results) {
-        if (q && q.symbol && !allData.find(x => x.symbol === q.symbol)) {
-          const parsed = parseQuote(q);
-          if (parsed) allData.push(parsed);
+      let results = null;
+
+      // Tenta o método que funcionou antes primeiro
+      if (successMethod === 'fmp')      results = await fetchFMP(batches[b]);
+      else if (successMethod === 'yahoo')   results = await fetchYahoo(batches[b]);
+      else if (successMethod === 'yahooAlt') results = await fetchYahooAlt(batches[b]);
+
+      // Se ainda não tem método definido (primeiro lote) ou falhou, tenta todos
+      if (!results) { results = await fetchFMP(batches[b]);      if (results) successMethod = 'fmp'; }
+      if (!results) { results = await fetchYahoo(batches[b]);    if (results) successMethod = 'yahoo'; }
+      if (!results) { results = await fetchYahooAlt(batches[b]); if (results) successMethod = 'yahooAlt'; }
+
+      if (results) {
+        for (const q of results) {
+          if (q && q.symbol && !allData.find(x => x.symbol === q.symbol)) {
+            q.fairPrice = calcFair(q);
+            allData.push(q);
+          }
         }
+        updateUI();
       }
 
-      // Renderiza após cada lote — as 10 primeiras aparecem em ~2s
-      updateSectors();
-      renderTable();
-
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 200));
     }
 
+    // Finaliza
     prog.style.display = 'none';
     progFill.style.width = '100%';
-    updateSectors();
-    renderTable();
-    document.getElementById('s-updated').textContent = new Date().toLocaleTimeString('pt-BR');
-    document.getElementById('count-badge').textContent = allData.length + ' / ' + TICKERS.length + ' empresas';
+    updateUI();
+    document.getElementById('s-updated').textContent =
+      new Date().toLocaleTimeString('pt-BR') +
+      (successMethod ? ' via ' + {fmp:'FMP',yahoo:'Yahoo',yahooAlt:'Yahoo²'}[successMethod] : '');
   }
 
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
