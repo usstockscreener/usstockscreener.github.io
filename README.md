@@ -1,4 +1,4 @@
-[index (2).html](https://github.com/user-attachments/files/28978543/index.2.html)
+[index (3).html](https://github.com/user-attachments/files/28978635/index.3.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#0F1729">
 <head>
@@ -820,10 +820,8 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
     perPage = getPerPage();
-    // Busca TODOS os tickers (até 300) para que filtros de setor funcionem corretamente.
-    // A paginação controla quantos são EXIBIDOS, não quantos são buscados.
-    const tickersToFetch = TICKERS;
-    const total = tickersToFetch.length;
+    const BATCH = 10; // Yahoo aceita até 10 tickers por request
+    const FIELDS = 'shortName,regularMarketPrice,regularMarketChangePercent,marketCap,trailingPE,priceToBook,priceToSalesTrailing12Months,enterpriseToEbitda,returnOnEquity,returnOnAssets,grossMargins,netMargins,operatingMargins,debtToEquity,currentRatio,trailingEps,freeCashflow,sharesOutstanding,dividendYield,averageVolume,pegRatio,revenueGrowth,sector';
 
     allData = [];
     currentPage = 1;
@@ -834,47 +832,58 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
 
-    for (let i = 0; i < tickersToFetch.length; i++) {
-      const sym = tickersToFetch[i];
-      progText.textContent = `Buscando ${i+1} de ${total}: ${sym} — dados aparecerão conforme carregam`;
-      progFill.style.width = ((i+1)/total*100) + '%';
+    // Divide tickers em lotes de 10
+    const batches = [];
+    for (let i = 0; i < TICKERS.length; i += BATCH) {
+      batches.push(TICKERS.slice(i, i + BATCH));
+    }
+
+    for (let b = 0; b < batches.length; b++) {
+      const batch = batches[b];
+      const syms  = batch.join(',');
+      const done  = b * BATCH;
+      progText.textContent = `Lote ${b+1} de ${batches.length} — ${done} de ${TICKERS.length} empresas carregadas`;
+      progFill.style.width = ((b+1) / batches.length * 100) + '%';
+
       try {
-        // Try multiple proxies/endpoints for CORS bypass
-        const FIELDS = 'shortName,regularMarketPrice,regularMarketChangePercent,marketCap,trailingPE,priceToBook,priceToSalesTrailing12Months,enterpriseToEbitda,returnOnEquity,returnOnAssets,grossMargins,netMargins,operatingMargins,debtToEquity,currentRatio,trailingEps,freeCashflow,sharesOutstanding,dividendYield,averageVolume,pegRatio,revenueGrowth,sector';
-        const YAHOO_URL = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${sym}&fields=${FIELDS}&crumb=`;
+        const YAHOO_URL = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${FIELDS}`;
         const PROXY1 = `https://corsproxy.io/?${encodeURIComponent(YAHOO_URL)}`;
         const PROXY2 = `https://api.allorigins.win/raw?url=${encodeURIComponent(YAHOO_URL)}`;
-        let r, lastErr;
+        let r = null;
         for (const url of [PROXY1, PROXY2]) {
-          try { r = await fetch(url, {headers:{'User-Agent':'Mozilla/5.0'}}); if(r.ok) break; } catch(e){ lastErr=e; r=null; }
+          try { r = await fetch(url); if (r && r.ok) break; } catch(e) { r = null; }
         }
-        if (!r || !r.ok) throw lastErr || new Error('All proxies failed');
+        if (!r || !r.ok) continue;
+
         const j = await r.json();
-        const q = j?.quoteResponse?.result?.[0];
-        if (q) {
+        const results = j?.quoteResponse?.result || [];
+        for (const q of results) {
           const fcfPerShare = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
           const s = {
-            symbol:sym, name:q.shortName||sym, sector:q.sector||'Unknown',
-            price:q.regularMarketPrice, change1d:q.regularMarketChangePercent,
-            marketCap:q.marketCap, pe:q.trailingPE, pb:q.priceToBook,
-            ps:q.priceToSalesTrailing12Months, evEbitda:q.enterpriseToEbitda,
-            roe:q.returnOnEquity, roa:q.returnOnAssets,
-            grossMargin:q.grossMargins, netMargin:q.netMargins, opMargin:q.operatingMargins,
-            debtEq:q.debtToEquity, currentRatio:q.currentRatio,
-            eps:q.trailingEps, fcfPerShare, divYield:q.dividendYield,
-            avgVol:q.averageVolume, peg:q.pegRatio,
-            growthRate:q.revenueGrowth||0.08
+            symbol: q.symbol, name: q.shortName||q.symbol, sector: q.sector||'Unknown',
+            price: q.regularMarketPrice, change1d: q.regularMarketChangePercent,
+            marketCap: q.marketCap, pe: q.trailingPE, pb: q.priceToBook,
+            ps: q.priceToSalesTrailing12Months, evEbitda: q.enterpriseToEbitda,
+            roe: q.returnOnEquity, roa: q.returnOnAssets,
+            grossMargin: q.grossMargins, netMargin: q.netMargins, opMargin: q.operatingMargins,
+            debtEq: q.debtToEquity, currentRatio: q.currentRatio,
+            eps: q.trailingEps, fcfPerShare, divYield: q.dividendYield,
+            avgVol: q.averageVolume, peg: q.pegRatio,
+            growthRate: q.revenueGrowth || 0.08
           };
           s.fairPrice = calcFair(s);
           allData.push(s);
-          // Render progressively every 5 tickers
-          if (allData.length % 5 === 0) renderTable();
         }
-      } catch(e){}
-      await new Promise(r=>setTimeout(r,110));
+        // Renderiza após cada lote — usuário já vê dados chegando
+        renderTable();
+      } catch(e) {}
+
+      // Pequena pausa entre lotes para não sobrecarregar o proxy
+      await new Promise(r => setTimeout(r, 300));
     }
 
     prog.style.display = 'none';
+    progText.textContent = '';
     const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
     const sel = document.getElementById('filter-sector');
     sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
