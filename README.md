@@ -1,5 +1,4 @@
-[index.html](https://github.com/user-attachments/files/28977975/us-stock-screener.1.html)
-<!DOCTYPE html>
+[index.html](https://github.com/user-attachments/files/28978020/us-stock-screener.2.html)
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -273,7 +272,16 @@
     }
   </style>
 </head>
-<body>
+<body style="background:#0B0F1C !important;color:#E2E8F5 !important;">
+<style>
+html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #0B0F1C !important; color: #E2E8F5; }
+thead th { background-color: #111624 !important; color: #7E8DB0 !important; }
+tbody tr:hover td { background-color: #111624 !important; }
+.table-wrap, .controls, .stats-bar, .legend, .site-header, .ad-banner, footer { background-color: #111624 !important; }
+.controls { background-color: #111624 !important; }
+.stats-bar { background-color: #0B0F1C !important; }
+input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 !important; border-color: #252D45 !important; }
+</style>
 
   <!-- ██████████  AD BANNER TOPO  ██████████ -->
   <div class="ad-banner" id="ad-top" aria-label="Espaço publicitário">
