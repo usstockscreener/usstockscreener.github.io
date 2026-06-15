@@ -1,6 +1,6 @@
-[index (9).html](https://github.com/user-attachments/files/28979020/index.9.html)
+[index (11).html](https://github.com/user-attachments/files/28979200/index.11.html)
 <!DOCTYPE html>
-<html lang="pt-BR" style="background:#1a2730">
+<html lang="pt-BR" style="background:#1a2744">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -818,193 +818,125 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   }
 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
-  // ─── API KEY FMP (gratuita — 250 req/dia) ───────────────────────────────────
-  // Crie conta em financialmodelingprep.com e cole sua chave aqui:
-  const FMP_KEY = 'demo';  // 'demo' funciona para teste com poucas empresas
-
   async function loadData() {
+    const FMP_KEY = 'hgwzqp0aVIJ25XEy54wNiaWfXYmO3I74';
+
     allData = [];
     currentPage = 1;
     document.getElementById('tbody').innerHTML = '';
-    document.getElementById('loading-msg').style.display = 'none';
     const prog     = document.getElementById('load-progress');
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
-    progText.textContent = 'Iniciando carregamento...';
-    progFill.style.width = '0%';
-
-    // ── helpers ──────────────────────────────────────────────────────────────
-    function updateSectors() {
-      const secs = [...new Set(allData.map(s=>s.sector).filter(x=>x&&x!=='Unknown'))].sort();
-      const sel = document.getElementById('filter-sector');
-      const cur = sel.value;
-      sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-      if (cur) sel.value = cur;
-    }
+    progText.textContent = 'Conectando...';
+    progFill.style.width = '2%';
 
     function updateUI() {
-      updateSectors();
+      const secs = [...new Set(allData.map(s=>s.sector).filter(x=>x&&x!=='Unknown'))].sort();
+      const sel  = document.getElementById('filter-sector');
+      const cur  = sel.value;
+      sel.innerHTML = '<option value="">Todos os setores</option>' +
+        secs.map(s=>`<option value="${s}">${s}</option>`).join('');
+      if (cur) sel.value = cur;
+      document.getElementById('count-badge').textContent =
+        allData.length + ' / ' + TICKERS.length + ' empresas';
       renderTable();
-      document.getElementById('count-badge').textContent = allData.length + ' / ' + TICKERS.length + ' empresas';
     }
 
-    // ── Método 1: Financial Modeling Prep (CORS nativo, gratuito) ────────────
+    // FMP /v3/quote/{symbols} — retorna array com todos os campos necessários
+    function parseFMP(q) {
+      if (!q || !q.symbol) return null;
+      const s = {
+        symbol:      q.symbol,
+        name:        q.name       || q.symbol,
+        sector:      q.sector     || null,
+        price:       q.price      || 0,
+        change1d:    q.changesPercentage || 0,
+        marketCap:   q.marketCap  || 0,
+        pe:          q.pe         || null,
+        pb:          q.priceToBookRatio || null,
+        ps:          q.priceToSalesRatio || null,
+        evEbitda:    q.enterpriseValueMultiple || null,
+        roe:         q.returnOnEquityTTM != null ? q.returnOnEquityTTM / 100 : null,
+        roa:         q.returnOnAssetsTTM != null ? q.returnOnAssetsTTM / 100 : null,
+        grossMargin: q.grossProfitMarginTTM != null ? q.grossProfitMarginTTM / 100 : null,
+        netMargin:   q.netProfitMarginTTM  != null ? q.netProfitMarginTTM  / 100 : null,
+        opMargin:    q.operatingProfitMarginTTM != null ? q.operatingProfitMarginTTM / 100 : null,
+        debtEq:      q.debtToEquityRatio   || null,
+        currentRatio:q.currentRatio        || null,
+        eps:         q.eps                 || null,
+        fcfPerShare: q.freeCashFlowPerShare || null,
+        divYield:    q.dividendYield != null ? q.dividendYield / 100 : null,
+        avgVol:      q.avgVolume           || null,
+        peg:         q.pegRatio            || null,
+        growthRate:  q.revenueGrowthTTM != null ? q.revenueGrowthTTM / 100 : 0.08
+      };
+      s.fairPrice = calcFair(s);
+      return s;
+    }
+
+    // FMP aceita até 50 símbolos por request separados por vírgula
     async function fetchFMP(tickers) {
+      const syms = tickers.join(',');
+      const url  = `https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${FMP_KEY}`;
       try {
-        const syms = tickers.join(',');
-        const url  = `https://financialmodelingprep.com/api/v3/quote/${syms}?apikey=${FMP_KEY}`;
-        const r    = await fetch(url);
-        if (!r.ok) return null;
+        const r = await fetch(url);
+        if (!r.ok) return [];
         const data = await r.json();
-        if (!Array.isArray(data) || data.length === 0) return null;
-        return data.map(q => ({
-          symbol:     q.symbol,
-          name:       q.name,
-          sector:     null,          // FMP /quote não traz setor — busca abaixo
-          price:      q.price||0,
-          change1d:   q.changesPercentage||0,
-          marketCap:  q.marketCap||0,
-          pe:         q.pe||null,
-          pb:         q.priceToBookRatio||null,
-          ps:         q.priceToSalesRatio||null,
-          evEbitda:   q.enterpriseValueMultiple||null,
-          roe:        q.returnOnEquityTTM ? q.returnOnEquityTTM/100 : null,
-          roa:        q.returnOnAssetsTTM ? q.returnOnAssetsTTM/100 : null,
-          grossMargin:q.grossProfitMarginTTM||null,
-          netMargin:  q.netProfitMarginTTM||null,
-          opMargin:   q.operatingProfitMarginTTM||null,
-          debtEq:     q.debtToEquityRatio||null,
-          currentRatio:q.currentRatio||null,
-          eps:        q.eps||null,
-          fcfPerShare:q.freeCashFlowPerShareTTM||null,
-          divYield:   q.dividendYield ? q.dividendYield/100 : null,
-          avgVol:     q.avgVolume||null,
-          peg:        null,
-          growthRate: 0.08
-        }));
-      } catch(e) { return null; }
+        if (!Array.isArray(data)) return [];
+        return data;
+      } catch(e) { return []; }
     }
 
-    // ── Método 2: Yahoo Finance via corsproxy.io ──────────────────────────────
-    async function fetchYahoo(tickers) {
-      try {
-        const syms   = tickers.join(',');
-        const yahoo  = `https://query1.finance.yahoo.com/v8/finance/spark?symbols=${syms}&range=1d&interval=1d`;
-        const quote  = `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${syms}`;
-        const proxy  = 'https://corsproxy.io/?';
-        const r      = await fetch(proxy + encodeURIComponent(quote));
-        if (!r.ok) return null;
-        const json   = await r.json();
-        const list   = json?.quoteResponse?.result;
-        if (!list || list.length === 0) return null;
-        return list.map(q => {
-          const fcf = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
-          return {
-            symbol:     q.symbol,
-            name:       q.shortName||q.symbol,
-            sector:     q.sector||null,
-            price:      q.regularMarketPrice||0,
-            change1d:   q.regularMarketChangePercent||0,
-            marketCap:  q.marketCap||0,
-            pe:         q.trailingPE||null,
-            pb:         q.priceToBook||null,
-            ps:         q.priceToSalesTrailing12Months||null,
-            evEbitda:   q.enterpriseToEbitda||null,
-            roe:        q.returnOnEquity||null,
-            roa:        q.returnOnAssets||null,
-            grossMargin:q.grossMargins||null,
-            netMargin:  q.netMargins||null,
-            opMargin:   q.operatingMargins||null,
-            debtEq:     q.debtToEquity||null,
-            currentRatio:q.currentRatio||null,
-            eps:        q.trailingEps||null,
-            fcfPerShare:fcf,
-            divYield:   q.dividendYield||null,
-            avgVol:     q.averageVolume||null,
-            peg:        q.pegRatio||null,
-            growthRate: q.revenueGrowth||0.08
-          };
-        });
-      } catch(e) { return null; }
-    }
-
-    // ── Método 3: Yahoo via allorigins ────────────────────────────────────────
-    async function fetchYahooAlt(tickers) {
-      try {
-        const syms  = tickers.join(',');
-        const quote = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}`;
-        const r     = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(quote));
-        if (!r.ok) return null;
-        const wrap  = await r.json();
-        if (!wrap.contents) return null;
-        const json  = JSON.parse(wrap.contents);
-        const list  = json?.quoteResponse?.result;
-        if (!list || list.length === 0) return null;
-        return list.map(q => {
-          const fcf = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
-          return {
-            symbol:q.symbol, name:q.shortName||q.symbol, sector:q.sector||null,
-            price:q.regularMarketPrice||0, change1d:q.regularMarketChangePercent||0,
-            marketCap:q.marketCap||0, pe:q.trailingPE||null, pb:q.priceToBook||null,
-            ps:q.priceToSalesTrailing12Months||null, evEbitda:q.enterpriseToEbitda||null,
-            roe:q.returnOnEquity||null, roa:q.returnOnAssets||null,
-            grossMargin:q.grossMargins||null, netMargin:q.netMargins||null, opMargin:q.operatingMargins||null,
-            debtEq:q.debtToEquity||null, currentRatio:q.currentRatio||null,
-            eps:q.trailingEps||null, fcfPerShare:fcf,
-            divYield:q.dividendYield||null, avgVol:q.averageVolume||null, peg:q.pegRatio||null,
-            growthRate:q.revenueGrowth||0.08
-          };
-        });
-      } catch(e) { return null; }
-    }
-
-    // ── Loop principal — tenta os 3 métodos em sequência ─────────────────────
-    const BATCH = 10;
+    // Lotes de 50 (FMP suporta até 50 por request)
+    const BATCH = 50;
     const batches = [];
-    for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
-
-    let successMethod = null; // guarda qual método funcionou primeiro
+    for (let i = 0; i < TICKERS.length; i += BATCH) {
+      batches.push(TICKERS.slice(i, i + BATCH));
+    }
 
     for (let b = 0; b < batches.length; b++) {
-      const pct = Math.round((b / batches.length) * 100);
+      const pct = Math.round(((b + 1) / batches.length) * 100);
       progText.textContent = `Carregando... ${pct}% — ${allData.length} empresas prontas`;
-      progFill.style.width  = pct + '%';
+      progFill.style.width = Math.max(pct, 5) + '%';
 
-      let results = null;
-
-      // Tenta o método que funcionou antes primeiro
-      if (successMethod === 'fmp')      results = await fetchFMP(batches[b]);
-      else if (successMethod === 'yahoo')   results = await fetchYahoo(batches[b]);
-      else if (successMethod === 'yahooAlt') results = await fetchYahooAlt(batches[b]);
-
-      // Se ainda não tem método definido (primeiro lote) ou falhou, tenta todos
-      if (!results) { results = await fetchFMP(batches[b]);      if (results) successMethod = 'fmp'; }
-      if (!results) { results = await fetchYahoo(batches[b]);    if (results) successMethod = 'yahoo'; }
-      if (!results) { results = await fetchYahooAlt(batches[b]); if (results) successMethod = 'yahooAlt'; }
-
-      if (results) {
-        for (const q of results) {
-          if (q && q.symbol && !allData.find(x => x.symbol === q.symbol)) {
-            q.fairPrice = calcFair(q);
-            allData.push(q);
-          }
+      const results = await fetchFMP(batches[b]);
+      for (const q of results) {
+        if (q?.symbol && !allData.find(x => x.symbol === q.symbol)) {
+          const parsed = parseFMP(q);
+          if (parsed) allData.push(parsed);
         }
-        updateUI();
       }
 
-      await new Promise(r => setTimeout(r, 200));
+      updateUI();
+      await new Promise(r => setTimeout(r, 300));
     }
 
-    // Finaliza
+    // FMP /quote não traz setor — busca perfil das empresas sem setor
+    const semSetor = allData.filter(s => !s.sector).map(s => s.symbol);
+    if (semSetor.length > 0) {
+      try {
+        const profileUrl = `https://financialmodelingprep.com/api/v3/profile/${semSetor.slice(0,50).join(',')}?apikey=${FMP_KEY}`;
+        const rp = await fetch(profileUrl);
+        if (rp.ok) {
+          const profiles = await rp.json();
+          if (Array.isArray(profiles)) {
+            profiles.forEach(p => {
+              const s = allData.find(x => x.symbol === p.symbol);
+              if (s && p.sector) s.sector = p.sector;
+            });
+          }
+        }
+      } catch(e) {}
+      updateUI();
+    }
+
     prog.style.display = 'none';
-    progFill.style.width = '100%';
     updateUI();
     document.getElementById('s-updated').textContent =
       new Date().toLocaleTimeString('pt-BR') +
-      (successMethod ? ' via ' + {fmp:'FMP',yahoo:'Yahoo',yahooAlt:'Yahoo²'}[successMethod] : '');
+      (allData.length > 0 ? ' · FMP' : ' · erro — verifique conexão');
   }
-
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
   // Sem dados demo — carrega dados reais imediatamente
   window.addEventListener('DOMContentLoaded', () => {
