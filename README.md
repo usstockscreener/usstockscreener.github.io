@@ -1,6 +1,6 @@
-[index (4).html](https://github.com/user-attachments/files/28978712/index.4.html)
+[index (6).html](https://github.com/user-attachments/files/28978824/index.6.html)
 <!DOCTYPE html>
-<html lang="pt-BR" style="background:#0F1729">
+<html lang="pt-BR" style="background:#1a2744">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:        #0F1729;
-      --bg2:       #151E35;
-      --bg3:       #1A2340;
-      --border:    #222C4A;
-      --border2:   #2A3555;
+      --bg:        #1a2744;
+      --bg2:       #1f2f52;
+      --bg3:       #243460;
+      --border:    #2a3d6e;
+      --border2:   #304278;
       --txt:       #E2E8F5;
       --txt2:      #7E8DB0;
       --txt3:      #4A5578;
@@ -31,12 +31,12 @@
       --radius-lg: 10px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 14px; scroll-behavior: smooth; background: #0F1729; }
-    table, tbody, tbody tr { background: #0F1729; }
-    tbody tr:nth-child(even) { background: #0e1220; }
-    tbody tr:hover { background: #151E35 !important; }
-    .table-wrap { background: #0F1729; }
-    input, select { background-color: #1A2340 !important; color: #E2E8F5 !important; }
+    html { font-size: 14px; scroll-behavior: smooth; background: #1a2744; }
+    table, tbody, tbody tr { background: #1a2744; }
+    tbody tr:nth-child(even) { background: #182240; }
+    tbody tr:hover { background: #1f2f52 !important; }
+    .table-wrap { background: #1a2744; }
+    input, select { background-color: #243460 !important; color: #E2E8F5 !important; }
     body { font-family: var(--font); background: var(--bg); color: var(--txt); min-height: 100vh; }
 
     /* ═══════════════════════════════════════
@@ -90,7 +90,7 @@
     .site-header h1 { font-size: 18px; font-weight: 600; color: var(--txt); letter-spacing: -0.02em; }
     .site-header h1 span { color: var(--accent); }
     .site-header p { font-size: 12px; color: var(--txt2); margin-top: 3px; max-width: 500px; line-height: 1.5; }
-    .badge { display: inline-flex; align-items: center; background: #1C2545; border: 1px solid #2D3A68; color: var(--accent); font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500; margin-left: 8px; }
+    .badge { display: inline-flex; align-items: center; background: #223065; border: 1px solid #344480; color: var(--accent); font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500; margin-left: 8px; }
 
     .controls {
       display: flex; gap: 8px; padding: 12px 20px;
@@ -271,32 +271,32 @@
       .controls, .stats-bar, .legend { padding: 8px 12px; }
       .mgrid { grid-template-columns: 1fr; }
     }
-    .pagination { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; border-top:1px solid #222C4A; background:#151E35; flex-wrap:wrap; gap:8px; }
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; border-top:1px solid #2a3d6e; background:#1f2f52; flex-wrap:wrap; gap:8px; }
     .pagination-info { font-size:11px; color:#4A5578; }
     .pagination-info b { color:#7E8DB0; }
     .page-btns { display:flex; gap:4px; }
-    .page-btn { height:28px; min-width:28px; padding:0 8px; font-size:11px; border-radius:5px; border:1px solid #2A3555; background:#0F1729; color:#7E8DB0; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.15s; }
-    .page-btn:hover:not(:disabled) { background:#1A2340; color:#E2E8F5; }
-    .page-btn.active { background:#1C2545; border-color:#4F8EF7; color:#4F8EF7; font-weight:500; }
+    .page-btn { height:28px; min-width:28px; padding:0 8px; font-size:11px; border-radius:5px; border:1px solid #304278; background:#1a2744; color:#7E8DB0; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.15s; }
+    .page-btn:hover:not(:disabled) { background:#243460; color:#E2E8F5; }
+    .page-btn.active { background:#223065; border-color:#4F8EF7; color:#4F8EF7; font-weight:500; }
     .page-btn:disabled { opacity:0.3; cursor:not-allowed; }
-    .load-progress { font-size:11px; color:#4F8EF7; padding:6px 20px 8px; background:#0F1729; border-bottom:1px solid #222C4A; display:none; }
-    .load-progress-bar { height:3px; background:#222C4A; margin-top:5px; border-radius:2px; overflow:hidden; }
+    .load-progress { font-size:11px; color:#4F8EF7; padding:6px 20px 8px; background:#1a2744; border-bottom:1px solid #2a3d6e; display:none; }
+    .load-progress-bar { height:3px; background:#2a3d6e; margin-top:5px; border-radius:2px; overflow:hidden; }
     .load-progress-fill { height:100%; background:#4F8EF7; border-radius:2px; transition:width 0.3s; width:0%; }
-    .table-topnav { display:flex; align-items:center; justify-content:space-between; padding:7px 12px; background:#151E35; border-bottom:1px solid #222C4A; flex-wrap:wrap; gap:6px; }
+    .table-topnav { display:flex; align-items:center; justify-content:space-between; padding:7px 12px; background:#1f2f52; border-bottom:1px solid #2a3d6e; flex-wrap:wrap; gap:6px; }
     .table-topnav .pagination-info { font-size:11px; color:#4A5578; }
     .table-topnav .pagination-info b { color:#7E8DB0; }
     .table-topnav .page-btns { display:flex; gap:4px; }
   </style>
 </head>
-<body style="background:#0F1729;color:#E2E8F5;min-height:100vh">
+<body style="background:#1a2744;color:#E2E8F5;min-height:100vh">
 <style>
-html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #0F1729 !important; color: #E2E8F5; }
-thead th { background-color: #151E35 !important; color: #7E8DB0 !important; }
-tbody tr:hover td { background-color: #151E35 !important; }
-.table-wrap, .controls, .stats-bar, .legend, .site-header, .ad-banner, footer { background-color: #151E35 !important; }
-.controls { background-color: #151E35 !important; }
-.stats-bar { background-color: #0F1729 !important; }
-input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 !important; border-color: #2A3555 !important; }
+html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #1a2744 !important; color: #E2E8F5; }
+thead th { background-color: #1f2f52 !important; color: #7E8DB0 !important; }
+tbody tr:hover td { background-color: #1f2f52 !important; }
+.table-wrap, .controls, .stats-bar, .legend, .site-header, .ad-banner, footer { background-color: #1f2f52 !important; }
+.controls { background-color: #1f2f52 !important; }
+.stats-bar { background-color: #1a2744 !important; }
+input[type=text], select { background-color: #243460 !important; color: #E2E8F5 !important; border-color: #304278 !important; }
 </style>
 
   <!-- ██████████  AD BANNER TOPO  ██████████ -->
@@ -382,7 +382,7 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
     <div class="table-topnav" id="table-topnav-top">
       <div class="pagination-info" id="pagination-info-top">—</div>
       <div class="page-btns" id="page-btns-top"></div>
-      <select id="per-page-top" onchange="syncPerPage('top')" style="height:26px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #2A3555;background:#1A2340;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
+      <select id="per-page-top" onchange="syncPerPage('top')" style="height:26px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #304278;background:#243460;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
         <option value="1">1</option>
         <option value="5">5</option>
         <option value="10">10</option>
@@ -419,7 +419,7 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
   <div class="pagination" id="pagination">
     <div class="pagination-info" id="pagination-info">—</div>
     <div class="page-btns" id="page-btns"></div>
-    <select id="per-page-bottom" onchange="syncPerPage('bottom')" style="height:28px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #2A3555;background:#1A2340;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
+    <select id="per-page-bottom" onchange="syncPerPage('bottom')" style="height:28px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #304278;background:#243460;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
       <option value="1">1 empresa</option>
       <option value="5">5 empresas</option>
       <option value="10">10 empresas</option>
@@ -820,7 +820,6 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
     perPage = getPerPage();
-    const BATCH = 10;
     const FIELDS = 'shortName,regularMarketPrice,regularMarketChangePercent,marketCap,trailingPE,priceToBook,priceToSalesTrailing12Months,enterpriseToEbitda,returnOnEquity,returnOnAssets,grossMargins,netMargins,operatingMargins,debtToEquity,currentRatio,trailingEps,freeCashflow,sharesOutstanding,dividendYield,averageVolume,pegRatio,revenueGrowth,sector';
 
     allData = [];
@@ -832,83 +831,100 @@ input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
 
-    const batches = [];
-    for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
-
-    async function fetchBatch(syms) {
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms.join(',')}&fields=${FIELDS}`;
-      // tenta direto primeiro (funciona em alguns browsers/redes sem CORS)
-      const proxies = [
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-        `https://thingproxy.freeboard.io/fetch/${url}`,
-      ];
-      for (const proxy of proxies) {
-        try {
-          const r = await fetch(proxy, {signal: AbortSignal.timeout(8000)});
-          if (!r.ok) continue;
-          const text = await r.text();
-          // allorigins wraps in {contents: "..."}
-          let json;
-          try { json = JSON.parse(text); } catch(e) { continue; }
-          // handle allorigins wrapper
-          if (json.contents) { try { json = JSON.parse(json.contents); } catch(e) { continue; } }
-          const results = json?.quoteResponse?.result;
-          if (results && results.length > 0) return results;
-        } catch(e) {}
-      }
-      return [];
-    }
-
+    // Função para parsear um quote do Yahoo
     function parseQuote(q) {
+      if (!q || !q.symbol) return null;
       const fcfPerShare = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
       const s = {
         symbol: q.symbol, name: q.shortName||q.symbol, sector: q.sector||'Unknown',
-        price: q.regularMarketPrice, change1d: q.regularMarketChangePercent,
-        marketCap: q.marketCap, pe: q.trailingPE, pb: q.priceToBook,
-        ps: q.priceToSalesTrailing12Months, evEbitda: q.enterpriseToEbitda,
-        roe: q.returnOnEquity, roa: q.returnOnAssets,
-        grossMargin: q.grossMargins, netMargin: q.netMargins, opMargin: q.operatingMargins,
-        debtEq: q.debtToEquity, currentRatio: q.currentRatio,
-        eps: q.trailingEps, fcfPerShare, divYield: q.dividendYield,
-        avgVol: q.averageVolume, peg: q.pegRatio,
+        price: q.regularMarketPrice||0, change1d: q.regularMarketChangePercent||0,
+        marketCap: q.marketCap||0, pe: q.trailingPE||null, pb: q.priceToBook||null,
+        ps: q.priceToSalesTrailing12Months||null, evEbitda: q.enterpriseToEbitda||null,
+        roe: q.returnOnEquity||null, roa: q.returnOnAssets||null,
+        grossMargin: q.grossMargins||null, netMargin: q.netMargins||null, opMargin: q.operatingMargins||null,
+        debtEq: q.debtToEquity||null, currentRatio: q.currentRatio||null,
+        eps: q.trailingEps||null, fcfPerShare, divYield: q.dividendYield||null,
+        avgVol: q.averageVolume||null, peg: q.pegRatio||null,
         growthRate: q.revenueGrowth || 0.08
       };
       s.fairPrice = calcFair(s);
       return s;
     }
 
-    // Processa 3 lotes em paralelo para ser mais rápido
-    const PARALLEL = 3;
-    for (let b = 0; b < batches.length; b += PARALLEL) {
-      const chunk = batches.slice(b, b + PARALLEL);
-      progText.textContent = `Carregando empresas ${b*BATCH+1}–${Math.min((b+PARALLEL)*BATCH, TICKERS.length)} de ${TICKERS.length}...`;
-      progFill.style.width = (Math.min(b + PARALLEL, batches.length) / batches.length * 100) + '%';
+    // Busca um lote de tickers via proxy
+    async function fetchBatch(tickers) {
+      const syms = tickers.join(',');
+      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${FIELDS}`;
 
-      const promises = chunk.map(batch => fetchBatch(batch));
-      const results = await Promise.all(promises);
+      // Tenta corsproxy.io primeiro
+      try {
+        const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(yahooUrl));
+        if (r.ok) {
+          const json = await r.json();
+          const res = json?.quoteResponse?.result;
+          if (res && res.length > 0) return res;
+        }
+      } catch(e) {}
 
-      for (const batchResults of results) {
-        for (const q of batchResults) {
-          // evita duplicatas
-          if (!allData.find(x => x.symbol === q.symbol)) {
-            allData.push(parseQuote(q));
+      // Fallback: allorigins (devolve {contents: "..."})
+      try {
+        const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(yahooUrl));
+        if (r.ok) {
+          const wrapper = await r.json();
+          if (wrapper.contents) {
+            const json = JSON.parse(wrapper.contents);
+            const res = json?.quoteResponse?.result;
+            if (res && res.length > 0) return res;
           }
+        }
+      } catch(e) {}
+
+      return [];
+    }
+
+    // Atualiza dropdown de setores
+    function updateSectors() {
+      const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
+      const sel = document.getElementById('filter-sector');
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
+      sel.value = cur; // mantém seleção atual
+    }
+
+    // Divide em lotes de 10
+    const BATCH = 10;
+    const batches = [];
+    for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
+
+    // Busca sequencial — mais confiável que paralelo com proxies gratuitos
+    for (let b = 0; b < batches.length; b++) {
+      const pct = Math.round((b / batches.length) * 100);
+      progText.textContent = `Carregando... ${pct}% (${allData.length} empresas prontas)`;
+      progFill.style.width = pct + '%';
+
+      const results = await fetchBatch(batches[b]);
+      for (const q of results) {
+        if (q && q.symbol && !allData.find(x => x.symbol === q.symbol)) {
+          const parsed = parseQuote(q);
+          if (parsed) allData.push(parsed);
         }
       }
 
-      // Atualiza setor dropdown e renderiza após cada grupo de lotes
-      const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
-      const sel = document.getElementById('filter-sector');
-      sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-      renderTable();
+      // Renderiza a cada 3 lotes (30 empresas)
+      if (b % 3 === 0 || b === batches.length - 1) {
+        updateSectors();
+        renderTable();
+      }
 
-      await new Promise(r => setTimeout(r, 200));
+      // 150ms entre lotes para não sobrecarregar o proxy
+      await new Promise(r => setTimeout(r, 150));
     }
 
     prog.style.display = 'none';
-    document.getElementById('s-updated').textContent = new Date().toLocaleTimeString('pt-BR') + ' (' + allData.length + ' carregadas)';
+    progFill.style.width = '100%';
+    updateSectors();
     renderTable();
+    document.getElementById('s-updated').textContent = new Date().toLocaleTimeString('pt-BR') + ' · ' + allData.length + ' empresas';
   }
 
   // ─── DADOS DEMO (carrega imediatamente) ─────────────────────────────────────
