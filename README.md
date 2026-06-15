@@ -1,9 +1,10 @@
-[index.html](https://github.com/user-attachments/files/28978020/us-stock-screener.2.html)
-<html lang="pt-BR">
+[index.html](https://github.com/user-attachments/files/28978215/index.html)
+<!DOCTYPE html>
+<html lang="pt-BR" style="background:#0B0F1C">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>US Stock Screener</title>
+  <title>US Stock Screener — Preço Justo & Indicadores</title>
   <meta name="description" content="Análise fundamentalista das maiores ações americanas com preço justo por DCF, P/L, ROE, margem líquida e mais.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -272,7 +273,7 @@
     }
   </style>
 </head>
-<body style="background:#0B0F1C !important;color:#E2E8F5 !important;">
+<body style="background:#0B0F1C;color:#E2E8F5;min-height:100vh">
 <style>
 html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #0B0F1C !important; color: #E2E8F5; }
 thead th { background-color: #111624 !important; color: #7E8DB0 !important; }
@@ -398,16 +399,49 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
   <script>
   // ─── TICKERS (100 maiores S&P500) ───────────────────────────────────────────
   const TICKERS = [
+    // Mega caps
     'AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA','BRK-B','AVGO','JPM',
     'LLY','V','UNH','XOM','MA','JNJ','PG','COST','HD','ABBV',
     'MRK','BAC','NFLX','CRM','CVX','ORCL','AMD','ADBE','KO','WMT',
     'PEP','CSCO','TMO','ACN','MCD','ABT','LIN','TXN','DHR','NKE',
     'WFC','PM','NEE','INTC','AMGN','IBM','QCOM','INTU','RTX','CAT',
+    // Large caps
     'HON','SPGI','GS','BKNG','AXP','LOW','UPS','ELV','PLD','MS',
     'VRTX','GILD','MDT','T','DE','AMAT','SCHW','ADI','REGN','CI',
     'ISRG','MU','LRCX','SYK','BX','CB','ETN','KLAC','ZTS','C',
     'PGR','MO','MMC','BSX','HCA','TJX','SO','DUK','BDX','NOW',
     'AON','SLB','GE','CME','MDLZ','PANW','SNPS','CDNS','EOG','F',
+    // Mid-large caps
+    'GM','MAR','PCAR','ODFL','CTAS','AFL','STZ','AZO','TDG','IDXX',
+    'ROST','EW','CTVA','TEL','VRSK','MNST','CARR','OTIS','PWR','BIIB',
+    'MSI','DXCM','GEHC','LHX','KEYS','EXC','PAYX','GIS','SRE','D',
+    'IQV','ON','EA','HAL','FAST','ACGL','HES','KR','CPRT','EBAY',
+    'TROW','DLTR','IR','VMC','MLM','GWW','CHD','ZBRA','IRM','TER',
+    // Finance & Insurance
+    'VLO','MPC','PSX','XEL','WAT','TFC','MTD','FTV','BR','ROK',
+    'ICE','COF','USB','PNC','TRV','ALL','MET','PRU','AFL','GL',
+    'AIZ','LNC','RGA','UNM','FNF','FAF','CINF','PFG','ERIE','HIG',
+    // Healthcare
+    'BMY','AMGN','BIIB','ILMN','IDXX','ALGN','HOLX','TECH','RMD','COO',
+    'BAX','BIO','HSIC','DVA','UHS','HUM','MOH','CNC','CVS','WBA',
+    'MCK','CAH','ABC','PDCO','PRGO','ENDP','MNK','BHC','JAZZ','HZNP',
+    // Tech & Semis
+    'ENPH','SEDG','MPWR','GNRC','TDY','PODD','QRVO','SWKS','MCHP','XLNX',
+    'FTNT','CTSH','INFY','WIT','EPAM','GLOB','PEGA','MANH','VEEV','ANSS',
+    'CDNS','SNPS','PTC','DASN','ALTR','TTWO','EA','ATVI','NTDOY','GLUU',
+    // Energy
+    'COP','OXY','DVN','FANG','APA','MRO','HES','PXD','EOG','SLB',
+    'HAL','BKR','NOV','HP','RIG','VAL','DO','NE','PTEN','PUMP',
+    // Consumer & Retail
+    'SBUX','CMG','YUM','QSR','DPZ','JACK','DRI','EAT','TXRH','WING',
+    'TGT','DG','DLTR','FIVE','OLLI','KR','ACI','SFM','WMT','COST',
+    // Industrials & Materials
+    'BA','LMT','NOC','GD','RTX','TXT','HII','KTOS','AJRD','LDOS',
+    'EMR','ROK','PH','ITW','AME','XYL','DOV','EXPD','CHRW','JBHT',
+    'NUE','STLD','RS','CMC','WOR','ATI','ALB','EMN','CE','LYB',
+    // Real Estate
+    'AMT','PLD','CCI','EQIX','WELL','PSA','DLR','O','SPG','VTR',
+    'EXR','AVB','EQR','MAA','UDR','CPT','ESS','BXP','KIM','REG',
   ];
 
   let allData = [];
