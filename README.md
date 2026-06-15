@@ -1,4 +1,4 @@
-[index (6).html](https://github.com/user-attachments/files/28978824/index.6.html)
+[index (7).html](https://github.com/user-attachments/files/28978895/index.7.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -819,9 +819,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
-    perPage = getPerPage();
-    const FIELDS = 'shortName,regularMarketPrice,regularMarketChangePercent,marketCap,trailingPE,priceToBook,priceToSalesTrailing12Months,enterpriseToEbitda,returnOnEquity,returnOnAssets,grossMargins,netMargins,operatingMargins,debtToEquity,currentRatio,trailingEps,freeCashflow,sharesOutstanding,dividendYield,averageVolume,pegRatio,revenueGrowth,sector';
-
     allData = [];
     currentPage = 1;
     document.getElementById('tbody').innerHTML = '';
@@ -831,7 +828,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
 
-    // Função para parsear um quote do Yahoo
     function parseQuote(q) {
       if (!q || !q.symbol) return null;
       const fcfPerShare = q.freeCashflow && q.sharesOutstanding ? q.freeCashflow/q.sharesOutstanding : null;
@@ -851,58 +847,50 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       return s;
     }
 
-    // Busca um lote de tickers via proxy
-    async function fetchBatch(tickers) {
-      const syms = tickers.join(',');
-      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${FIELDS}`;
-
-      // Tenta corsproxy.io primeiro
-      try {
-        const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(yahooUrl));
-        if (r.ok) {
-          const json = await r.json();
-          const res = json?.quoteResponse?.result;
-          if (res && res.length > 0) return res;
-        }
-      } catch(e) {}
-
-      // Fallback: allorigins (devolve {contents: "..."})
-      try {
-        const r = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(yahooUrl));
-        if (r.ok) {
-          const wrapper = await r.json();
-          if (wrapper.contents) {
-            const json = JSON.parse(wrapper.contents);
-            const res = json?.quoteResponse?.result;
-            if (res && res.length > 0) return res;
-          }
-        }
-      } catch(e) {}
-
-      return [];
-    }
-
-    // Atualiza dropdown de setores
     function updateSectors() {
       const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
       const sel = document.getElementById('filter-sector');
       const cur = sel.value;
       sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-      sel.value = cur; // mantém seleção atual
+      sel.value = cur;
     }
 
-    // Divide em lotes de 10
+    // Usa JSONP — funciona sem CORS em qualquer browser
+    function fetchYahooJSONP(tickers) {
+      return new Promise((resolve) => {
+        const id = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const timeout = setTimeout(() => {
+          delete window[id];
+          resolve([]);
+        }, 10000);
+
+        window[id] = function(data) {
+          clearTimeout(timeout);
+          delete window[id];
+          const results = data?.quoteResponse?.result || [];
+          resolve(results);
+        };
+
+        const syms = tickers.join('%2C');
+        const fields = 'shortName%2CregularMarketPrice%2CregularMarketChangePercent%2CmarketCap%2CtrailingPE%2CpriceToBook%2CpriceToSalesTrailing12Months%2CenterpriseToEbitda%2CreturnOnEquity%2CreturnOnAssets%2CgrossMargins%2CnetMargins%2CoperatingMargins%2CdebtToEquity%2CcurrentRatio%2CtrailingEps%2CfreeCashflow%2CsharesOutstanding%2CdividendYield%2CaverageVolume%2CpegRatio%2CrevenueGrowth%2Csector';
+        const script = document.createElement('script');
+        script.src = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=${fields}&callback=${id}`;
+        script.onerror = () => { clearTimeout(timeout); delete window[id]; resolve([]); };
+        document.head.appendChild(script);
+        setTimeout(() => { try { document.head.removeChild(script); } catch(e){} }, 11000);
+      });
+    }
+
     const BATCH = 10;
     const batches = [];
     for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
 
-    // Busca sequencial — mais confiável que paralelo com proxies gratuitos
     for (let b = 0; b < batches.length; b++) {
       const pct = Math.round((b / batches.length) * 100);
-      progText.textContent = `Carregando... ${pct}% (${allData.length} empresas prontas)`;
+      progText.textContent = `Carregando... ${pct}% — ${allData.length} empresas prontas`;
       progFill.style.width = pct + '%';
 
-      const results = await fetchBatch(batches[b]);
+      const results = await fetchYahooJSONP(batches[b]);
       for (const q of results) {
         if (q && q.symbol && !allData.find(x => x.symbol === q.symbol)) {
           const parsed = parseQuote(q);
@@ -910,13 +898,11 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
         }
       }
 
-      // Renderiza a cada 3 lotes (30 empresas)
       if (b % 3 === 0 || b === batches.length - 1) {
         updateSectors();
         renderTable();
       }
 
-      // 150ms entre lotes para não sobrecarregar o proxy
       await new Promise(r => setTimeout(r, 150));
     }
 
