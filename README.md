@@ -1,6 +1,6 @@
-[index (1).html](https://github.com/user-attachments/files/28978364/index.1.html)
+[index (2).html](https://github.com/user-attachments/files/28978543/index.2.html)
 <!DOCTYPE html>
-<html lang="pt-BR" style="background:#0B0F1C">
+<html lang="pt-BR" style="background:#0F1729">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg:        #0B0F1C;
-      --bg2:       #111624;
-      --bg3:       #181D2E;
-      --border:    #1E2640;
-      --border2:   #252D45;
+      --bg:        #0F1729;
+      --bg2:       #151E35;
+      --bg3:       #1A2340;
+      --border:    #222C4A;
+      --border2:   #2A3555;
       --txt:       #E2E8F5;
       --txt2:      #7E8DB0;
       --txt3:      #4A5578;
@@ -22,8 +22,8 @@
       --green:     #1DB87A;
       --red:       #E05252;
       --yellow:    #D4952A;
-      --green-bg:  #0D2B1E;
-      --red-bg:    #2B1212;
+      --green-bg:  #0E2E20;
+      --red-bg:    #2E1414;
       --yellow-bg: #2B2010;
       --font:      'Inter', system-ui, sans-serif;
       --mono:      'DM Mono', monospace;
@@ -31,12 +31,12 @@
       --radius-lg: 10px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 14px; scroll-behavior: smooth; background: #0B0F1C; }
-    table, tbody, tbody tr { background: #0B0F1C; }
+    html { font-size: 14px; scroll-behavior: smooth; background: #0F1729; }
+    table, tbody, tbody tr { background: #0F1729; }
     tbody tr:nth-child(even) { background: #0e1220; }
-    tbody tr:hover { background: #111624 !important; }
-    .table-wrap { background: #0B0F1C; }
-    input, select { background-color: #181D2E !important; color: #E2E8F5 !important; }
+    tbody tr:hover { background: #151E35 !important; }
+    .table-wrap { background: #0F1729; }
+    input, select { background-color: #1A2340 !important; color: #E2E8F5 !important; }
     body { font-family: var(--font); background: var(--bg); color: var(--txt); min-height: 100vh; }
 
     /* ═══════════════════════════════════════
@@ -90,7 +90,7 @@
     .site-header h1 { font-size: 18px; font-weight: 600; color: var(--txt); letter-spacing: -0.02em; }
     .site-header h1 span { color: var(--accent); }
     .site-header p { font-size: 12px; color: var(--txt2); margin-top: 3px; max-width: 500px; line-height: 1.5; }
-    .badge { display: inline-flex; align-items: center; background: #1A2240; border: 1px solid #2A3560; color: var(--accent); font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500; margin-left: 8px; }
+    .badge { display: inline-flex; align-items: center; background: #1C2545; border: 1px solid #2D3A68; color: var(--accent); font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500; margin-left: 8px; }
 
     .controls {
       display: flex; gap: 8px; padding: 12px 20px;
@@ -132,9 +132,9 @@
       background: var(--bg2); white-space: nowrap;
     }
     .chip b { font-weight: 500; }
-    .chip.c-green { border-color: #1A4030; background: var(--green-bg); }
+    .chip.c-green { border-color: #1C4433; background: var(--green-bg); }
     .chip.c-green b { color: var(--green); }
-    .chip.c-red { border-color: #3D1A1A; background: var(--red-bg); }
+    .chip.c-red { border-color: #401C1C; background: var(--red-bg); }
     .chip.c-red b { color: var(--red); }
 
     .legend {
@@ -247,9 +247,9 @@
     }
     .dcf-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--txt3); margin-top: 5px; }
     .verdict-pill { display: inline-flex; align-items: center; gap: 5px; margin-top: 8px; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-    .vp-buy  { background: var(--green-bg); color: var(--green); border: 1px solid #1A4030; }
-    .vp-sell { background: var(--red-bg);   color: var(--red);   border: 1px solid #3D1A1A; }
-    .vp-fair { background: #101D36;          color: var(--accent); border: 1px solid #1A2E56; }
+    .vp-buy  { background: var(--green-bg); color: var(--green); border: 1px solid #1C4433; }
+    .vp-sell { background: var(--red-bg);   color: var(--red);   border: 1px solid #401C1C; }
+    .vp-fair { background: #112040;          color: var(--accent); border: 1px solid #1A2E56; }
     .modal-btn {
       margin-top: 0.9rem; width: 100%; height: 36px; font-size: 12px;
       border-radius: var(--radius); border: 1px solid var(--border2);
@@ -271,28 +271,32 @@
       .controls, .stats-bar, .legend { padding: 8px 12px; }
       .mgrid { grid-template-columns: 1fr; }
     }
-    .pagination { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; border-top:1px solid #1E2640; background:#111624; flex-wrap:wrap; gap:8px; }
+    .pagination { display:flex; align-items:center; justify-content:space-between; padding:10px 20px; border-top:1px solid #222C4A; background:#151E35; flex-wrap:wrap; gap:8px; }
     .pagination-info { font-size:11px; color:#4A5578; }
     .pagination-info b { color:#7E8DB0; }
     .page-btns { display:flex; gap:4px; }
-    .page-btn { height:28px; min-width:28px; padding:0 8px; font-size:11px; border-radius:5px; border:1px solid #252D45; background:#0B0F1C; color:#7E8DB0; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.15s; }
-    .page-btn:hover:not(:disabled) { background:#181D2E; color:#E2E8F5; }
-    .page-btn.active { background:#1A2240; border-color:#4F8EF7; color:#4F8EF7; font-weight:500; }
+    .page-btn { height:28px; min-width:28px; padding:0 8px; font-size:11px; border-radius:5px; border:1px solid #2A3555; background:#0F1729; color:#7E8DB0; cursor:pointer; font-family:'Inter',sans-serif; transition:all 0.15s; }
+    .page-btn:hover:not(:disabled) { background:#1A2340; color:#E2E8F5; }
+    .page-btn.active { background:#1C2545; border-color:#4F8EF7; color:#4F8EF7; font-weight:500; }
     .page-btn:disabled { opacity:0.3; cursor:not-allowed; }
-    .load-progress { font-size:11px; color:#4F8EF7; padding:6px 20px 8px; background:#0B0F1C; border-bottom:1px solid #1E2640; display:none; }
-    .load-progress-bar { height:3px; background:#1E2640; margin-top:5px; border-radius:2px; overflow:hidden; }
+    .load-progress { font-size:11px; color:#4F8EF7; padding:6px 20px 8px; background:#0F1729; border-bottom:1px solid #222C4A; display:none; }
+    .load-progress-bar { height:3px; background:#222C4A; margin-top:5px; border-radius:2px; overflow:hidden; }
     .load-progress-fill { height:100%; background:#4F8EF7; border-radius:2px; transition:width 0.3s; width:0%; }
+    .table-topnav { display:flex; align-items:center; justify-content:space-between; padding:7px 12px; background:#151E35; border-bottom:1px solid #222C4A; flex-wrap:wrap; gap:6px; }
+    .table-topnav .pagination-info { font-size:11px; color:#4A5578; }
+    .table-topnav .pagination-info b { color:#7E8DB0; }
+    .table-topnav .page-btns { display:flex; gap:4px; }
   </style>
 </head>
-<body style="background:#0B0F1C;color:#E2E8F5;min-height:100vh">
+<body style="background:#0F1729;color:#E2E8F5;min-height:100vh">
 <style>
-html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #0B0F1C !important; color: #E2E8F5; }
-thead th { background-color: #111624 !important; color: #7E8DB0 !important; }
-tbody tr:hover td { background-color: #111624 !important; }
-.table-wrap, .controls, .stats-bar, .legend, .site-header, .ad-banner, footer { background-color: #111624 !important; }
-.controls { background-color: #111624 !important; }
-.stats-bar { background-color: #0B0F1C !important; }
-input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 !important; border-color: #252D45 !important; }
+html,body,div,main,section,table,tbody,tr,td,th,thead { background-color: #0F1729 !important; color: #E2E8F5; }
+thead th { background-color: #151E35 !important; color: #7E8DB0 !important; }
+tbody tr:hover td { background-color: #151E35 !important; }
+.table-wrap, .controls, .stats-bar, .legend, .site-header, .ad-banner, footer { background-color: #151E35 !important; }
+.controls { background-color: #151E35 !important; }
+.stats-bar { background-color: #0F1729 !important; }
+input[type=text], select { background-color: #1A2340 !important; color: #E2E8F5 !important; border-color: #2A3555 !important; }
 </style>
 
   <!-- ██████████  AD BANNER TOPO  ██████████ -->
@@ -338,13 +342,13 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
       <option value="high">P/L acima de 40</option>
     </select>
     <select id="per-page" onchange="changePerPage()">
+      <option value="1">1 empresa</option>
+      <option value="5">5 empresas</option>
+      <option value="10">10 empresas</option>
       <option value="20" selected>20 empresas</option>
+      <option value="30">30 empresas</option>
       <option value="40">40 empresas</option>
-      <option value="60">60 empresas</option>
-      <option value="80">80 empresas</option>
-      <option value="100">100 empresas</option>
-      <option value="200">200 empresas</option>
-      <option value="300">300 empresas (lento)</option>
+      <option value="50">50 empresas</option>
     </select>
   </div>
 
@@ -374,6 +378,20 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
 
   <!-- ██████████  TABELA  ██████████ -->
   <div class="table-wrap">
+    <!-- Navegação topo -->
+    <div class="table-topnav" id="table-topnav-top">
+      <div class="pagination-info" id="pagination-info-top">—</div>
+      <div class="page-btns" id="page-btns-top"></div>
+      <select id="per-page-top" onchange="syncPerPage('top')" style="height:26px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #2A3555;background:#1A2340;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="20" selected>20</option>
+        <option value="30">30</option>
+        <option value="40">40</option>
+        <option value="50">50</option>
+      </select>
+    </div>
     <table id="stock-table">
       <thead>
         <tr>
@@ -401,6 +419,15 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
   <div class="pagination" id="pagination">
     <div class="pagination-info" id="pagination-info">—</div>
     <div class="page-btns" id="page-btns"></div>
+    <select id="per-page-bottom" onchange="syncPerPage('bottom')" style="height:28px;font-size:11px;padding:0 6px;border-radius:5px;border:1px solid #2A3555;background:#1A2340;color:#7E8DB0;cursor:pointer;font-family:'Inter',sans-serif;">
+      <option value="1">1 empresa</option>
+      <option value="5">5 empresas</option>
+      <option value="10">10 empresas</option>
+      <option value="20" selected>20 empresas</option>
+      <option value="30">30 empresas</option>
+      <option value="40">40 empresas</option>
+      <option value="50">50 empresas</option>
+    </select>
   </div>
 
   <!-- ██████████  AD BANNER RODAPÉ  ██████████ -->
@@ -551,6 +578,11 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
   function changePerPage() {
     perPage = getPerPage();
     currentPage = 1;
+    // sync all selects
+    ['per-page','per-page-top','per-page-bottom'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = perPage;
+    });
     if (allData.length > 0) { renderTable(); return; }
     loadData();
   }
@@ -608,7 +640,7 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
     }).join('');
 
     // Stats
-    document.getElementById('count-badge').textContent = filtered.length + ' ações';
+    document.getElementById('count-badge').textContent = TICKERS.length + ' empresas';
     document.getElementById('s-under').textContent = allData.filter(s=>getVerdict(s.price,s.fairPrice).code==='sub').length;
     document.getElementById('s-fair').textContent  = allData.filter(s=>getVerdict(s.price,s.fairPrice).code==='fair').length;
     document.getElementById('s-over').textContent  = allData.filter(s=>getVerdict(s.price,s.fairPrice).code==='over').length;
@@ -616,34 +648,65 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
     // Info paginação
     const from = filtered.length ? start+1 : 0;
     const to   = Math.min(start+perPage, filtered.length);
-    document.getElementById('pagination-info').innerHTML =
-      `Mostrando <b>${from}–${to}</b> de <b>${filtered.length}</b> empresas carregadas`;
+    const infoHtml = `Mostrando <b>${from}–${to}</b> de <b>${filtered.length}</b> carregadas`;
+    document.getElementById('pagination-info').innerHTML = infoHtml;
+    const elTop = document.getElementById('pagination-info-top');
+    if (elTop) elTop.innerHTML = infoHtml;
 
-    // Botões paginação
-    const btns = document.getElementById('page-btns');
-    btns.innerHTML = '';
-    const addBtn = (label, page, disabled, active) => {
-      const b = document.createElement('button');
-      b.className = 'page-btn' + (active?' active':'');
-      b.textContent = label;
-      b.disabled = disabled;
-      b.onclick = () => { currentPage = page; renderTable(); window.scrollTo({top:0,behavior:'smooth'}); };
-      btns.appendChild(b);
-    };
-    addBtn('← Ant.', currentPage-1, currentPage===1, false);
-    const range = [];
-    for (let i=1; i<=totalPages; i++) {
-      if (i===1||i===totalPages||Math.abs(i-currentPage)<=2) range.push(i);
-      else if (range[range.length-1]!=='…') range.push('…');
-    }
-    range.forEach(p => {
-      if (p==='…') {
-        const sp = document.createElement('span');
-        sp.textContent='…'; sp.style.cssText='color:#4A5578;padding:0 4px;font-size:11px;line-height:28px';
-        btns.appendChild(sp);
-      } else addBtn(p, p, false, p===currentPage);
+    // Sync selects
+    ['per-page','per-page-top','per-page-bottom'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = perPage;
     });
-    addBtn('Próx. →', currentPage+1, currentPage===totalPages, false);
+
+    // Gera botões para topo e rodapé
+    function buildPageBtns(containerId, scrollTop) {
+      const btns = document.getElementById(containerId);
+      if (!btns) return;
+      btns.innerHTML = '';
+      const addBtn = (label, page, disabled, active) => {
+        const b = document.createElement('button');
+        b.className = 'page-btn' + (active?' active':'');
+        b.textContent = label;
+        b.disabled = disabled;
+        b.onclick = () => {
+          currentPage = page;
+          renderTable();
+          if (scrollTop) window.scrollTo({top:0,behavior:'smooth'});
+        };
+        btns.appendChild(b);
+      };
+      addBtn('←', currentPage-1, currentPage===1, false);
+      const range = [];
+      for (let i=1; i<=totalPages; i++) {
+        if (i===1||i===totalPages||Math.abs(i-currentPage)<=2) range.push(i);
+        else if (range[range.length-1]!=='…') range.push('…');
+      }
+      range.forEach(p => {
+        if (p==='…') {
+          const sp = document.createElement('span');
+          sp.textContent='…'; sp.style.cssText='color:#4A5578;padding:0 4px;font-size:11px;line-height:28px';
+          btns.appendChild(sp);
+        } else addBtn(p, p, false, p===currentPage);
+      });
+      addBtn('→', currentPage+1, currentPage===totalPages, false);
+    }
+    buildPageBtns('page-btns-top', true);
+    buildPageBtns('page-btns', false);
+  }
+
+  function syncPerPage(source) {
+    const val = document.getElementById('per-page-'+(source==='top'?'top':source==='bottom'?'bottom':'top')).value
+              || document.getElementById('per-page').value;
+    // sync all selects
+    ['per-page','per-page-top','per-page-bottom'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+    perPage = parseInt(val);
+    currentPage = 1;
+    if (allData.length > 0) { renderTable(); return; }
+    loadData();
   }
 
   // ─── MODAL ──────────────────────────────────────────────────────────────────
@@ -757,8 +820,9 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
     perPage = getPerPage();
-    const limit = perPage; // busca apenas a quantidade selecionada
-    const tickersToFetch = TICKERS.slice(0, limit);
+    // Busca TODOS os tickers (até 300) para que filtros de setor funcionem corretamente.
+    // A paginação controla quantos são EXIBIDOS, não quantos são buscados.
+    const tickersToFetch = TICKERS;
     const total = tickersToFetch.length;
 
     allData = [];
@@ -772,7 +836,7 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
 
     for (let i = 0; i < tickersToFetch.length; i++) {
       const sym = tickersToFetch[i];
-      progText.textContent = `Carregando ${i+1} de ${total} empresas (${sym})...`;
+      progText.textContent = `Buscando ${i+1} de ${total}: ${sym} — dados aparecerão conforme carregam`;
       progFill.style.width = ((i+1)/total*100) + '%';
       try {
         // Try multiple proxies/endpoints for CORS bypass
@@ -803,6 +867,8 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
           };
           s.fairPrice = calcFair(s);
           allData.push(s);
+          // Render progressively every 5 tickers
+          if (allData.length % 5 === 0) renderTable();
         }
       } catch(e){}
       await new Promise(r=>setTimeout(r,110));
@@ -812,7 +878,7 @@ input[type=text], select { background-color: #181D2E !important; color: #E2E8F5 
     const secs = [...new Set(allData.map(s=>s.sector).filter(Boolean))].sort();
     const sel = document.getElementById('filter-sector');
     sel.innerHTML = '<option value="">Todos os setores</option>'+secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-    document.getElementById('s-updated').textContent = new Date().toLocaleTimeString('pt-BR') + ' (' + total + ' empresas)';
+    document.getElementById('s-updated').textContent = new Date().toLocaleTimeString('pt-BR');
     renderTable();
   }
 
