@@ -1,10 +1,27 @@
-[index (20).html](https://github.com/user-attachments/files/28980575/index.20.html)<!DOCTYPE html>
+[index (22).html](https://github.com/user-attachments/files/28980864/index.22.html)
+<!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>US Stock Screener — Preço Justo & Indicadores</title>
-  <meta name="description" content="Análise fundamentalista das maiores ações americanas com preço justo por DCF, P/L, ROE, margem líquida e mais.">
+  <title>US Stock Screener — Preço Justo, P/L, ROE e DCF das Maiores Ações Americanas</title>
+  <meta name="description" content="Analise as 300+ maiores ações da bolsa americana com preço justo por DCF, P/L, ROE, EV/EBITDA e mais. Gratuito e atualizado em tempo real.">
+  <meta name="keywords" content="stock screener, ações americanas, preço justo, DCF, P/L, ROE, análise fundamentalista, S&P 500, NASDAQ, investimentos EUA">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://usstockscreener.github.io/usstockscreener/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://usstockscreener.github.io/usstockscreener/">
+  <meta property="og:title" content="US Stock Screener — Preço Justo das Maiores Ações Americanas">
+  <meta property="og:description" content="Analise as 300+ maiores ações da bolsa americana com DCF, P/L, ROE, EV/EBITDA e mais. Gratuito.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="US Stock Screener — Preço Justo das Maiores Ações Americanas">
+  <meta name="twitter:description" content="Analise as 300+ maiores ações americanas com DCF, P/L, ROE e mais. Gratuito.">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"US Stock Screener","url":"https://usstockscreener.github.io/usstockscreener/","description":"Screener gratuito com análise fundamentalista das 300+ maiores ações americanas.","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  </script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1449092006519708" crossorigin="anonymous"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
@@ -439,12 +456,12 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   <!-- ██████████  FOOTER  ██████████ -->
   <footer>
-    <p><strong>US Stock Screener</strong> — dados via Yahoo Finance (atraso ~15 min). Atualizado a cada visita.</p>
-    <p style="margin-top:4px">O preço justo é calculado por DCF simplificado (taxa de desconto 10%, múltiplo terminal 15×). <strong>Não constitui recomendação de investimento.</strong></p>
+    <p><strong>US Stock Screener</strong> — dados via Finnhub. Atualizado a cada visita.</p>
+    <p style="margin-top:4px;font-size:11px">Preço justo calculado por DCF (taxa de desconto 10%, múltiplo terminal 15×). <strong>Não constitui recomendação de investimento.</strong></p>
     <p style="margin-top:8px">
-      <a href="#">Sobre</a> &nbsp;·&nbsp;
-      <a href="#">Metodologia DCF</a> &nbsp;·&nbsp;
-      <a href="#">Aviso Legal</a>
+      <a href="sobre.html">Sobre</a> &nbsp;·&nbsp;
+      <a href="privacidade.html">Política de Privacidade</a> &nbsp;·&nbsp;
+      <a href="aviso-legal.html">Aviso Legal</a>
     </p>
   </footer>
 
@@ -921,4 +938,3 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   </script>
 </body>
 </html>
-
