@@ -1,4 +1,4 @@
-[index.html](https://github.com/user-attachments/files/28980864/index.22.html)
+[index.html](https://github.com/user-attachments/files/29022152/index.25.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -338,6 +338,11 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       <button class="btn btn-primary" onclick="loadData()">⟳ Atualizar dados</button>
     </div>
   </header>
+
+  <!-- Conteúdo estático para SEO e AdSense -->
+  <section style="max-width:1200px;margin:0 auto 1rem;padding:0 1rem 1rem;color:#7E8DB0;font-size:13px;line-height:1.7;border-bottom:1px solid #222C4A">
+    <p>O <strong style="color:#E2E8F5">US Stock Screener</strong> reúne indicadores fundamentalistas das 330 maiores empresas da bolsa americana — S&P 500 e NASDAQ. Compare P/L, P/VP, ROE, EV/EBITDA e margem líquida em tempo real. Cada ação recebe um <strong style="color:#E2E8F5">preço justo por DCF</strong> com termômetro visual de margem de segurança. Empresas analisadas: <strong style="color:#E2E8F5">Apple (AAPL), Microsoft (MSFT), NVIDIA (NVDA), Alphabet (GOOGL), Amazon (AMZN), Meta (META), Tesla (TSLA), JPMorgan (JPM), Johnson & Johnson (JNJ), Berkshire Hathaway (BRK-B)</strong> e mais 320 empresas dos setores de tecnologia, saúde, finanças, energia e consumo.</p>
+  </section>
 
   <!-- ██████████  CONTROLES  ██████████ -->
   <div class="controls">
