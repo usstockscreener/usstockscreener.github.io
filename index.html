@@ -24,7 +24,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
+  
+  /* ── NAVBAR ── */
+  .navbar { background: #111d36; border-bottom: 1px solid #243460; padding: 0 1.5rem; display: flex; align-items: center; height: 48px; gap: 0; }
+  .navbar .logo { font-size: 20px; font-weight: 700; color: #E2E8F5; text-decoration: none; margin-right: 2rem; }
+  .navbar .logo span { color: var(--accent); }
+  .navbar a { font-size: 13px; color: #7E8DB0; text-decoration: none; padding: 0 14px; height: 48px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .navbar a:hover { color: #E2E8F5; }
+  .navbar a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  :root {
       --bg:        #1a2744;
       --bg2:       #1f2f52;
       --bg3:       #243460;
@@ -102,7 +111,7 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .site-header h1 { font-size: 18px; font-weight: 600; color: var(--txt); letter-spacing: -0.02em; }
+    .site-header h1 { font-size: 17px; font-weight: 600; color: var(--txt); letter-spacing: -0.02em; }
     .site-header h1 span { color: var(--accent); }
     .site-header p { font-size: 12px; color: var(--txt2); margin-top: 3px; max-width: 500px; line-height: 1.5; }
     .badge { display: inline-flex; align-items: center; background: #223065; border: 1px solid #344480; color: var(--accent); font-size: 11px; padding: 2px 10px; border-radius: 20px; font-weight: 500; margin-left: 8px; }
@@ -315,6 +324,15 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 </style>
 
   <!-- ██████████  AD BANNER TOPO  ██████████ -->
+  <nav class="navbar">
+    <a href="index.html" class="logo">US Stock <span>Screener</span></a>
+    <a href="index.html" class="active">Home</a>
+    <a href="metodologia.html">Metodologia DCF</a>
+    <a href="sobre.html">Sobre</a>
+    <a href="privacidade.html">Privacidade</a>
+    <a href="aviso-legal.html">Aviso Legal</a>
+  </nav>
+
   <div class="ad-banner" id="ad-top" aria-label="Espaço publicitário">
     <!--
       CARBON ADS — cole aqui o código do Carbon Ads depois de aprovado:
@@ -330,7 +348,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   <header class="site-header">
     <div>
       <h1>US Stock <span>Screener</span> <span class="badge" id="count-badge">0 ações</span></h1>
-      <p>Indicadores fundamentalistas + preço justo por Fluxo de Caixa Descontado (DCF) para as maiores empresas americanas.</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       <button class="btn btn-ghost" onclick="exportCSV()">⬇ Exportar CSV</button>
@@ -469,6 +486,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     <p style="font-size:11px;color:#3A4560;margin-top:8px;max-width:800px;margin-left:auto;margin-right:auto">Screener gratuito com análise fundamentalista das 330 maiores ações americanas (S&amp;P 500 e NASDAQ). Inclui Apple (AAPL), Microsoft (MSFT), NVIDIA (NVDA), Alphabet (GOOGL), Amazon (AMZN), Meta (META), Tesla (TSLA), JPMorgan (JPM), Johnson &amp; Johnson (JNJ) e Berkshire Hathaway (BRK-B). Compare P/L, P/VP, ROE, EV/EBITDA, margem líquida e preço justo por DCF.</p>
     <p style="margin-top:4px;font-size:11px">Preço justo calculado por DCF (taxa de desconto 10%, múltiplo terminal 15×). <strong>Não constitui recomendação de investimento.</strong></p>
     <p style="margin-top:8px">
+      <a href="metodologia.html">Metodologia DCF</a> &nbsp;·&nbsp;
       <a href="sobre.html">Sobre</a> &nbsp;·&nbsp;
       <a href="privacidade.html">Política de Privacidade</a> &nbsp;·&nbsp;
       <a href="aviso-legal.html">Aviso Legal</a>
