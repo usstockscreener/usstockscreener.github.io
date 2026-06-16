@@ -609,7 +609,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   function renderTable() {
     const q   = document.getElementById('search').value.toLowerCase();
-    const sec = document.getElementById('filter-sector').value;
+    const sec = '';
     const vf  = document.getElementById('filter-verdict').value;
     const pef = document.getElementById('filter-pe').value;
     perPage   = getPerPage();
@@ -851,12 +851,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     progFill.style.width = '1%';
 
     function updateUI() {
-      const secs = [...new Set(allData.map(s=>s.sector).filter(x=>x&&x!=='Unknown'))].sort();
-      const sel  = document.getElementById('filter-sector');
-      const cur  = sel.value;
-      sel.innerHTML = '<option value="">Todos os setores</option>' +
-        secs.map(s=>`<option value="${s}">${s}</option>`).join('');
-      if (cur) sel.value = cur;
+      // setor removido
       document.getElementById('count-badge').textContent =
         allData.length + ' / ' + TICKERS.length + ' empresas';
       renderTable();
