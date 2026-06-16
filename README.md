@@ -1,4 +1,4 @@
-[index (14).html](https://github.com/user-attachments/files/28979655/index.14.html)
+[index (15).html](https://github.com/user-attachments/files/28979715/index.15.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -819,14 +819,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
-    // ══════════════════════════════════════════════════════════
-    // CONFIGURAÇÃO — troque pela URL do seu Cloudflare Worker
-    // depois de criar em workers.cloudflare.com
-    // Enquanto não tiver o worker, usa FMP direto (1 símbolo/vez)
-    // ══════════════════════════════════════════════════════════
     const WORKER_URL = 'https://frosty-flower-1533.calheirospereira2.workers.dev';
-    const FMP_KEY    = 'hgwzqp0aVIJ25XEy54wNiaWfXYmO3I74';
-    const FMP_BASE   = 'https://financialmodelingprep.com/stable';
 
     allData = [];
     currentPage = 1;
@@ -850,88 +843,58 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       renderTable();
     }
 
-    // Busca 1 símbolo via Worker (se tiver) ou FMP direto
-    async function fetchOne(symbol) {
-      const base = WORKER_URL || FMP_BASE;
-      const url  = WORKER_URL
-        ? `${WORKER_URL}/quote?symbol=${symbol}`
-        : `${FMP_BASE}/quote?symbol=${symbol}&apikey=${FMP_KEY}`;
+    // /full combina quote + key-metrics + profile em 1 chamada ao worker
+    async function fetchFull(symbol) {
       try {
-        const r    = await fetch(url);
-        const text = await r.text();
+        const r = await fetch(`${WORKER_URL}/full?symbol=${symbol}`);
         if (!r.ok) return null;
-        let data;
-        try { data = JSON.parse(text); } catch(e) { return null; }
-        // FMP retorna array mesmo para 1 símbolo
-        const q = Array.isArray(data) ? data[0] : data;
-        if (!q || !q.symbol) return null;
-        return q;
-      } catch(e) { return null; }
-    }
+        const d = await r.json();
+        if (!d?.symbol) return null;
 
-    async function fetchProfile(symbol) {
-      const url = WORKER_URL
-        ? `${WORKER_URL}/profile?symbol=${symbol}`
-        : `${FMP_BASE}/profile?symbol=${symbol}&apikey=${FMP_KEY}`;
-      try {
-        const r    = await fetch(url);
-        if (!r.ok) return null;
-        const data = await r.json();
-        const p    = Array.isArray(data) ? data[0] : data;
-        return p || null;
+        const s = {
+          symbol:      d.symbol,
+          name:        d.name        || symbol,
+          sector:      d.sector      || null,
+          price:       d.price       || 0,
+          change1d:    d.changesPercentage || 0,
+          marketCap:   d.marketCap   || 0,
+          pe:          d.pe          || null,
+          pb:          d.pbRatio     || null,
+          ps:          d.psRatio     || null,
+          evEbitda:    d.evToEbitda  || null,
+          roe:         d.roe         || null,
+          roa:         d.roa         || null,
+          grossMargin: d.grossProfitMargin != null ? d.grossProfitMargin / 100 : null,
+          netMargin:   d.netProfitMargin   != null ? d.netProfitMargin   / 100 : null,
+          opMargin:    d.operatingMargin   != null ? d.operatingMargin   / 100 : null,
+          debtEq:      d.debtToEquity      || null,
+          currentRatio:d.currentRatio      || null,
+          eps:         d.eps || d.netIncomePerShare || null,
+          fcfPerShare: d.freeCashFlowPerShare || null,
+          divYield:    d.dividendYield     || null,
+          avgVol:      d.avgVolume         || null,
+          peg:         null,
+          growthRate:  d.revenueGrowth != null ? d.revenueGrowth / 100 : 0.08,
+        };
+        s.fairPrice = calcFair(s);
+        return s;
       } catch(e) { return null; }
-    }
-
-    function buildStock(q, p) {
-      const s = {
-        symbol:      q.symbol,
-        name:        p?.companyName  || q.name       || q.symbol,
-        sector:      p?.sector       || null,
-        price:       parseFloat(q.price)              || 0,
-        change1d:    parseFloat(q.changesPercentage)   || 0,
-        marketCap:   q.marketCap                      || 0,
-        pe:          q.pe                             || null,
-        pb:          p?.priceToBookRatioTTM           || null,
-        ps:          p?.priceToSalesRatioTTM          || null,
-        evEbitda:    q.enterpriseValueMultiple        || null,
-        roe:         p?.roe          != null ? p.roe  / 100 : null,
-        roa:         p?.roa          != null ? p.roa  / 100 : null,
-        grossMargin: p?.grossProfitMarginTTM != null ? p.grossProfitMarginTTM / 100 : null,
-        netMargin:   p?.netProfitMarginTTM   != null ? p.netProfitMarginTTM   / 100 : null,
-        opMargin:    p?.operatingProfitMarginTTM != null ? p.operatingProfitMarginTTM / 100 : null,
-        debtEq:      p?.debtToEquityRatio             || null,
-        currentRatio:p?.currentRatioTTM               || null,
-        eps:         q.eps                            || null,
-        fcfPerShare: p?.freeCashFlowPerShareTTM       || null,
-        divYield:    p?.lastDiv && q.price ? p.lastDiv / q.price : null,
-        avgVol:      q.avgVolume                      || null,
-        peg:         null,
-        growthRate:  p?.revenueGrowthTTM != null ? p.revenueGrowthTTM / 100 : 0.08,
-      };
-      s.fairPrice = calcFair(s);
-      return s;
     }
 
     const total = TICKERS.length;
-
     for (let i = 0; i < total; i++) {
       const sym = TICKERS[i];
       const pct = Math.round(((i + 1) / total) * 100);
       progText.textContent = `${i+1}/${total} — ${sym} — ${allData.length} carregadas`;
       progFill.style.width = Math.max(pct, 1) + '%';
 
-      // Busca quote e profile em paralelo
-      const [q, p] = await Promise.all([fetchOne(sym), fetchProfile(sym)]);
-
-      if (q) {
-        allData.push(buildStock(q, p));
-        // Atualiza tabela a cada 5 empresas
-        if (allData.length % 5 === 0) updateUI();
+      const s = await fetchFull(sym);
+      if (s) {
+        allData.push(s);
+        if (allData.length % 10 === 0) updateUI();
       }
 
-      // Respeita limite: 250 req/dia ÷ 2 calls/empresa = ~125 empresas/dia
-      // Com Worker não precisa de delay; sem Worker, delay para não bloquear
-      if (!WORKER_URL) await new Promise(r => setTimeout(r, 500));
+      // Sem delay — worker tem cache de 1h, não sobrecarrega a FMP
     }
 
     prog.style.display = 'none';
