@@ -1,4 +1,4 @@
-[index (18).html](https://github.com/user-attachments/files/28980226/index.18.html)
+[index (19).html](https://github.com/user-attachments/files/28980474/index.19.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -878,12 +878,13 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     }
 
     function parseStock(d) {
-      if (!d || (!d.price && d.price !== 0)) {
-        console.warn('[parse] ignorado:', d?.symbol, '— sem price:', JSON.stringify(d).slice(0,100));
+      if (!d || !d.symbol) {
+        console.warn('[parse] ignorado — sem symbol');
         return null;
       }
-      if (d.price === 0) {
-        console.warn('[parse] price=0 para', d.symbol, '— ignorando');
+      // Aceita price=0 (mercado fechado) — mostra dados fundamentalistas mesmo sem preço ao vivo
+      if (!d.price && d.price !== 0) {
+        console.warn('[parse] ignorado:', d.symbol, '— sem campo price');
         return null;
       }
 
