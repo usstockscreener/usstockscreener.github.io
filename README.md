@@ -1,4 +1,4 @@
-[index (15).html](https://github.com/user-attachments/files/28979715/index.15.html)
+[index (16).html](https://github.com/user-attachments/files/28979810/index.16.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -843,65 +843,84 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       renderTable();
     }
 
-    // /full combina quote + key-metrics + profile em 1 chamada ao worker
-    async function fetchFull(symbol) {
-      try {
-        const r = await fetch(`${WORKER_URL}/full?symbol=${symbol}`);
-        if (!r.ok) return null;
-        const d = await r.json();
-        if (!d?.symbol) return null;
+    // Parse do /quote da FMP — usa APENAS campos que realmente vêm no free plan
+    function parseQuote(d) {
+      if (!d?.symbol) return null;
 
-        const s = {
-          symbol:      d.symbol,
-          name:        d.name        || symbol,
-          sector:      d.sector      || null,
-          price:       d.price       || 0,
-          change1d:    d.changesPercentage || 0,
-          marketCap:   d.marketCap   || 0,
-          pe:          d.pe          || null,
-          pb:          d.pbRatio     || null,
-          ps:          d.psRatio     || null,
-          evEbitda:    d.evToEbitda  || null,
-          roe:         d.roe         || null,
-          roa:         d.roa         || null,
-          grossMargin: d.grossProfitMargin != null ? d.grossProfitMargin / 100 : null,
-          netMargin:   d.netProfitMargin   != null ? d.netProfitMargin   / 100 : null,
-          opMargin:    d.operatingMargin   != null ? d.operatingMargin   / 100 : null,
-          debtEq:      d.debtToEquity      || null,
-          currentRatio:d.currentRatio      || null,
-          eps:         d.eps || d.netIncomePerShare || null,
-          fcfPerShare: d.freeCashFlowPerShare || null,
-          divYield:    d.dividendYield     || null,
-          avgVol:      d.avgVolume         || null,
-          peg:         null,
-          growthRate:  d.revenueGrowth != null ? d.revenueGrowth / 100 : 0.08,
-        };
-        s.fairPrice = calcFair(s);
-        return s;
-      } catch(e) { return null; }
+      // O DCF usa EPS e crescimento estimado
+      // EPS vem do /quote. Crescimento estimado baseado no setor
+      const eps = d.eps || null;
+      const pe  = d.pe  || null;
+
+      // Estimativa de crescimento pelo P/E (Graham): g ≈ (P/E - 8.5) / 2 / 100
+      // Se não tem P/E, usa 8% como padrão conservador
+      const growthRate = pe && pe > 8.5 ? Math.min((pe - 8.5) / 200, 0.30) : 0.08;
+
+      const s = {
+        symbol:      d.symbol,
+        name:        d.name         || d.symbol,
+        sector:      d.sector       || null,
+        price:       d.price        || 0,
+        change1d:    d.changesPercentage || 0,
+        marketCap:   d.marketCap    || 0,
+        pe:          pe,
+        pb:          d.priceToBookRatio || null,
+        ps:          d.priceToSalesRatio || null,
+        evEbitda:    d.enterpriseValueMultiple || null,
+        roe:         null,
+        roa:         null,
+        grossMargin: null,
+        netMargin:   null,
+        opMargin:    null,
+        debtEq:      null,
+        currentRatio:null,
+        eps:         eps,
+        fcfPerShare: null,
+        divYield:    d.dividendYield ? d.dividendYield / 100 : null,
+        avgVol:      d.avgVolume    || null,
+        peg:         null,
+        growthRate:  growthRate,
+      };
+      s.fairPrice = calcFair(s);
+      return s;
     }
 
     const total = TICKERS.length;
+    let errors = 0;
+
     for (let i = 0; i < total; i++) {
       const sym = TICKERS[i];
       const pct = Math.round(((i + 1) / total) * 100);
       progText.textContent = `${i+1}/${total} — ${sym} — ${allData.length} carregadas`;
       progFill.style.width = Math.max(pct, 1) + '%';
 
-      const s = await fetchFull(sym);
-      if (s) {
-        allData.push(s);
-        if (allData.length % 10 === 0) updateUI();
-      }
-
-      // Sem delay — worker tem cache de 1h, não sobrecarrega a FMP
+      try {
+        const r = await fetch(`${WORKER_URL}?symbol=${sym}`);
+        if (r.ok) {
+          const data = await r.json();
+          // /quote retorna array
+          const q = Array.isArray(data) ? data[0] : data;
+          const parsed = parseQuote(q);
+          if (parsed) {
+            allData.push(parsed);
+            if (allData.length % 10 === 0) updateUI();
+          }
+        } else {
+          errors++;
+          // Se muitos erros seguidos, provavelmente limite da FMP — para
+          if (errors > 5) {
+            progText.textContent = `Limite da API atingido após ${allData.length} empresas. Tente amanhã para mais.`;
+            break;
+          }
+        }
+      } catch(e) { errors++; }
     }
 
     prog.style.display = 'none';
     updateUI();
     document.getElementById('s-updated').textContent =
       new Date().toLocaleTimeString('pt-BR') +
-      (allData.length > 0 ? ` · ${allData.length} empresas ✓` : ' · 0 empresas');
+      ` · ${allData.length} empresas ✓`;
   }
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
   // Sem dados demo — carrega dados reais imediatamente
