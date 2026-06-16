@@ -1,4 +1,4 @@
-[index (13).html](https://github.com/user-attachments/files/28979418/index.13.html)
+[index (14).html](https://github.com/user-attachments/files/28979655/index.14.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -819,8 +819,14 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
-    const FMP_KEY  = 'hgwzqp0aVIJ25XEy54wNiaWfXYmO3I74';
-    const FMP_BASE = 'https://financialmodelingprep.com/stable';
+    // ══════════════════════════════════════════════════════════
+    // CONFIGURAÇÃO — troque pela URL do seu Cloudflare Worker
+    // depois de criar em workers.cloudflare.com
+    // Enquanto não tiver o worker, usa FMP direto (1 símbolo/vez)
+    // ══════════════════════════════════════════════════════════
+    const WORKER_URL = 'https://frosty-flower-1533.calheirospereira2.workers.dev';
+    const FMP_KEY    = 'hgwzqp0aVIJ25XEy54wNiaWfXYmO3I74';
+    const FMP_BASE   = 'https://financialmodelingprep.com/stable';
 
     allData = [];
     currentPage = 1;
@@ -829,8 +835,8 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
-    progText.textContent = 'Conectando...';
-    progFill.style.width = '2%';
+    progText.textContent = 'Iniciando...';
+    progFill.style.width = '1%';
 
     function updateUI() {
       const secs = [...new Set(allData.map(s=>s.sector).filter(x=>x&&x!=='Unknown'))].sort();
@@ -841,172 +847,98 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       if (cur) sel.value = cur;
       document.getElementById('count-badge').textContent =
         allData.length + ' / ' + TICKERS.length + ' empresas';
-      console.log('[DEBUG] renderTable chamado, allData.length =', allData.length);
       renderTable();
     }
 
-    // Parse usando APENAS os campos que a FMP /stable/quote realmente retorna
-    function parseFMP(q) {
-      if (!q || !q.symbol) return null;
+    // Busca 1 símbolo via Worker (se tiver) ou FMP direto
+    async function fetchOne(symbol) {
+      const base = WORKER_URL || FMP_BASE;
+      const url  = WORKER_URL
+        ? `${WORKER_URL}/quote?symbol=${symbol}`
+        : `${FMP_BASE}/quote?symbol=${symbol}&apikey=${FMP_KEY}`;
+      try {
+        const r    = await fetch(url);
+        const text = await r.text();
+        if (!r.ok) return null;
+        let data;
+        try { data = JSON.parse(text); } catch(e) { return null; }
+        // FMP retorna array mesmo para 1 símbolo
+        const q = Array.isArray(data) ? data[0] : data;
+        if (!q || !q.symbol) return null;
+        return q;
+      } catch(e) { return null; }
+    }
+
+    async function fetchProfile(symbol) {
+      const url = WORKER_URL
+        ? `${WORKER_URL}/profile?symbol=${symbol}`
+        : `${FMP_BASE}/profile?symbol=${symbol}&apikey=${FMP_KEY}`;
+      try {
+        const r    = await fetch(url);
+        if (!r.ok) return null;
+        const data = await r.json();
+        const p    = Array.isArray(data) ? data[0] : data;
+        return p || null;
+      } catch(e) { return null; }
+    }
+
+    function buildStock(q, p) {
       const s = {
         symbol:      q.symbol,
-        name:        q.name            || q.symbol,
-        sector:      null,              // /quote nao retorna setor — busca via /profile
+        name:        p?.companyName  || q.name       || q.symbol,
+        sector:      p?.sector       || null,
         price:       parseFloat(q.price)              || 0,
         change1d:    parseFloat(q.changesPercentage)   || 0,
-        marketCap:   q.marketCap        || 0,
-        pe:          q.pe               || null,
-        pb:          null,
-        ps:          null,
-        evEbitda:    null,
-        roe:         null,
-        roa:         null,
-        grossMargin: null,
-        netMargin:   null,
-        opMargin:    null,
-        debtEq:      null,
-        currentRatio:null,
-        eps:         q.eps              || null,
-        fcfPerShare: null,
-        divYield:    null,
-        avgVol:      q.avgVolume        || null,
+        marketCap:   q.marketCap                      || 0,
+        pe:          q.pe                             || null,
+        pb:          p?.priceToBookRatioTTM           || null,
+        ps:          p?.priceToSalesRatioTTM          || null,
+        evEbitda:    q.enterpriseValueMultiple        || null,
+        roe:         p?.roe          != null ? p.roe  / 100 : null,
+        roa:         p?.roa          != null ? p.roa  / 100 : null,
+        grossMargin: p?.grossProfitMarginTTM != null ? p.grossProfitMarginTTM / 100 : null,
+        netMargin:   p?.netProfitMarginTTM   != null ? p.netProfitMarginTTM   / 100 : null,
+        opMargin:    p?.operatingProfitMarginTTM != null ? p.operatingProfitMarginTTM / 100 : null,
+        debtEq:      p?.debtToEquityRatio             || null,
+        currentRatio:p?.currentRatioTTM               || null,
+        eps:         q.eps                            || null,
+        fcfPerShare: p?.freeCashFlowPerShareTTM       || null,
+        divYield:    p?.lastDiv && q.price ? p.lastDiv / q.price : null,
+        avgVol:      q.avgVolume                      || null,
         peg:         null,
-        growthRate:  0.08
+        growthRate:  p?.revenueGrowthTTM != null ? p.revenueGrowthTTM / 100 : 0.08,
       };
       s.fairPrice = calcFair(s);
       return s;
     }
 
-    // Busca quotes
-    async function fetchQuotes(tickers) {
-      const syms = tickers.join(',');
-      const url  = `${FMP_BASE}/quote?symbol=${syms}&apikey=${FMP_KEY}`;
-      console.log('[FMP quote] URL:', url);
-      try {
-        const r    = await fetch(url);
-        const text = await r.text();
-        console.log('[FMP quote] status:', r.status);
-        console.log('[FMP quote] resposta (primeiros 500 chars):', text.slice(0, 500));
-        if (!r.ok) { progText.textContent = `FMP erro ${r.status}: ${text.slice(0,80)}`; return []; }
-        let data;
-        try { data = JSON.parse(text); } catch(e) {
-          console.error('[FMP quote] JSON inválido:', text.slice(0, 200));
-          progText.textContent = 'Resposta não é JSON: ' + text.slice(0,80);
-          return [];
-        }
-        if (!Array.isArray(data)) {
-          console.warn('[FMP quote] não é array:', data);
-          progText.textContent = 'FMP: ' + JSON.stringify(data).slice(0,100);
-          return [];
-        }
-        console.log('[FMP quote] primeiro item recebido:', JSON.stringify(data[0]));
-        return data;
-      } catch(e) {
-        console.error('[FMP quote] fetch error:', e.message);
-        progText.textContent = 'Erro de conexão: ' + e.message;
-        return [];
-      }
-    }
+    const total = TICKERS.length;
 
-    // Busca perfil (setor + indicadores fundamentalistas)
-    async function fetchProfile(tickers) {
-      const syms = tickers.join(',');
-      const url  = `${FMP_BASE}/profile?symbol=${syms}&apikey=${FMP_KEY}`;
-      console.log('[FMP profile] URL:', url);
-      try {
-        const r    = await fetch(url);
-        const text = await r.text();
-        console.log('[FMP profile] status:', r.status);
-        console.log('[FMP profile] primeiro item:', text.slice(0, 500));
-        if (!r.ok) return [];
-        let data;
-        try { data = JSON.parse(text); } catch(e) { return []; }
-        if (!Array.isArray(data)) return [];
-        return data;
-      } catch(e) { return []; }
-    }
+    for (let i = 0; i < total; i++) {
+      const sym = TICKERS[i];
+      const pct = Math.round(((i + 1) / total) * 100);
+      progText.textContent = `${i+1}/${total} — ${sym} — ${allData.length} carregadas`;
+      progFill.style.width = Math.max(pct, 1) + '%';
 
-    // Busca key metrics (ROE, ROA, margens, etc.)
-    async function fetchMetrics(tickers) {
-      const syms = tickers.join(',');
-      const url  = `${FMP_BASE}/key-metrics?symbol=${syms}&apikey=${FMP_KEY}&limit=1`;
-      console.log('[FMP metrics] URL:', url);
-      try {
-        const r    = await fetch(url);
-        const text = await r.text();
-        console.log('[FMP metrics] status:', r.status, '| resp:', text.slice(0,300));
-        if (!r.ok) return [];
-        let data;
-        try { data = JSON.parse(text); } catch(e) { return []; }
-        return Array.isArray(data) ? data : [];
-      } catch(e) { return []; }
-    }
+      // Busca quote e profile em paralelo
+      const [q, p] = await Promise.all([fetchOne(sym), fetchProfile(sym)]);
 
-    // Lotes de 20
-    const BATCH = 20;
-    const batches = [];
-    for (let i = 0; i < TICKERS.length; i += BATCH) batches.push(TICKERS.slice(i, i + BATCH));
-
-    // PASSO 1: carrega quotes (preço, P/E, market cap)
-    for (let b = 0; b < batches.length; b++) {
-      const pct = Math.round(((b + 1) / batches.length) * 50);
-      progText.textContent = `Quotes ${b+1}/${batches.length} — ${allData.length} prontas`;
-      progFill.style.width = Math.max(pct, 5) + '%';
-
-      const results = await fetchQuotes(batches[b]);
-      for (const q of results) {
-        if (q?.symbol && !allData.find(x => x.symbol === q.symbol)) {
-          const parsed = parseFMP(q);
-          if (parsed) {
-            allData.push(parsed);
-            console.log('[DEBUG] pushed:', parsed.symbol, '| allData.length:', allData.length);
-          }
-        }
-      }
-      updateUI();
-      await new Promise(r => setTimeout(r, 300));
-    }
-
-    console.log('[DEBUG] após quotes, allData:', allData.length, allData);
-
-    // PASSO 2: enriquece com perfil (setor + dados fundamentais)
-    for (let b = 0; b < batches.length; b++) {
-      const pct = 50 + Math.round(((b + 1) / batches.length) * 50);
-      progText.textContent = `Perfis ${b+1}/${batches.length} — enriquecendo dados...`;
-      progFill.style.width = pct + '%';
-
-      const profiles = await fetchProfile(batches[b]);
-      for (const p of profiles) {
-        const s = allData.find(x => x.symbol === p.symbol);
-        if (!s) continue;
-        s.sector      = p.sector       || s.sector;
-        s.name        = p.companyName  || s.name;
-        s.roe         = p.roe          ? p.roe/100         : s.roe;
-        s.roa         = p.roa          ? p.roa/100         : s.roa;
-        s.grossMargin = p.grossProfitMarginTTM ? p.grossProfitMarginTTM/100 : s.grossMargin;
-        s.netMargin   = p.netProfitMarginTTM   ? p.netProfitMarginTTM/100   : s.netMargin;
-        s.opMargin    = p.operatingProfitMarginTTM ? p.operatingProfitMarginTTM/100 : s.opMargin;
-        s.pb          = p.priceToBookRatioTTM  || s.pb;
-        s.ps          = p.priceToSalesRatioTTM || s.ps;
-        s.debtEq      = p.debtToEquityRatio    || s.debtEq;
-        s.currentRatio= p.currentRatioTTM      || s.currentRatio;
-        s.divYield    = p.lastDiv && s.price ? (p.lastDiv / s.price) : s.divYield;
-        s.growthRate  = p.revenueGrowthTTM ? p.revenueGrowthTTM/100 : s.growthRate;
-        s.fairPrice   = calcFair(s);
-        console.log('[DEBUG] profile enriquecido:', s.symbol, 'setor:', s.sector);
+      if (q) {
+        allData.push(buildStock(q, p));
+        // Atualiza tabela a cada 5 empresas
+        if (allData.length % 5 === 0) updateUI();
       }
 
-      updateUI();
-      await new Promise(r => setTimeout(r, 300));
+      // Respeita limite: 250 req/dia ÷ 2 calls/empresa = ~125 empresas/dia
+      // Com Worker não precisa de delay; sem Worker, delay para não bloquear
+      if (!WORKER_URL) await new Promise(r => setTimeout(r, 500));
     }
-
-    console.log('[DEBUG] FINAL allData:', allData);
 
     prog.style.display = 'none';
     updateUI();
     document.getElementById('s-updated').textContent =
       new Date().toLocaleTimeString('pt-BR') +
-      (allData.length > 0 ? ` · ${allData.length} empresas ✓` : ' · 0 empresas — ver console');
+      (allData.length > 0 ? ` · ${allData.length} empresas ✓` : ' · 0 empresas');
   }
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
   // Sem dados demo — carrega dados reais imediatamente
