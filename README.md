@@ -1,4 +1,4 @@
-[index (17).html](https://github.com/user-attachments/files/28980018/index.17.html)
+[index (18).html](https://github.com/user-attachments/files/28980226/index.18.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -828,7 +828,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
-    progText.textContent = 'Conectando ao Finnhub...';
+    progText.textContent = 'Testando worker...';
     progFill.style.width = '1%';
 
     function updateUI() {
@@ -843,9 +843,51 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       renderTable();
     }
 
+    // Testa AAPL primeiro e loga resposta completa
+    try {
+      const testR = await fetch(`${WORKER_URL}?symbol=AAPL`);
+      const testText = await testR.text();
+      console.log('[Worker] status:', testR.status);
+      console.log('[Worker] resposta AAPL:', testText.slice(0, 500));
+
+      if (!testR.ok) {
+        progText.textContent = `Worker erro ${testR.status}: ${testText.slice(0,100)}`;
+        prog.style.background = '#2B1212';
+        return;
+      }
+
+      let testData;
+      try { testData = JSON.parse(testText); } catch(e) {
+        progText.textContent = 'Resposta inválida: ' + testText.slice(0,100);
+        return;
+      }
+
+      console.log('[Worker] dados parseados:', JSON.stringify(testData));
+
+      if (!testData.price && testData.price !== 0) {
+        progText.textContent = 'Worker OK mas sem campo price. Ver console F12.';
+        console.error('[Worker] campos recebidos:', Object.keys(testData));
+        return;
+      }
+
+      progText.textContent = `Conectado! AAPL $${testData.price} — carregando...`;
+    } catch(e) {
+      progText.textContent = 'Erro ao conectar: ' + e.message;
+      console.error('[Worker] erro:', e);
+      return;
+    }
+
     function parseStock(d) {
-      if (!d?.symbol || !d?.price) return null;
-      const growthRate = d.revenueGrowth != null
+      if (!d || (!d.price && d.price !== 0)) {
+        console.warn('[parse] ignorado:', d?.symbol, '— sem price:', JSON.stringify(d).slice(0,100));
+        return null;
+      }
+      if (d.price === 0) {
+        console.warn('[parse] price=0 para', d.symbol, '— ignorando');
+        return null;
+      }
+
+      const growthRate = d.revenueGrowth != null && d.revenueGrowth !== 0
         ? Math.min(Math.max(d.revenueGrowth, 0), 0.30)
         : (d.pe && d.pe > 8.5 ? Math.min((d.pe - 8.5) / 200, 0.30) : 0.08);
 
@@ -853,7 +895,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
         symbol:      d.symbol,
         name:        d.name        || d.symbol,
         sector:      d.sector      || null,
-        price:       d.price       || 0,
+        price:       d.price,
         change1d:    d.change1d    || 0,
         marketCap:   d.marketCap   || 0,
         pe:          d.pe          || null,
@@ -878,7 +920,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       return s;
     }
 
-    // Processa em lotes de 5 em paralelo (Finnhub: 60 req/min = 1/seg, 5 paralelo = seguro)
     const PARALLEL = 5;
     const total = TICKERS.length;
 
@@ -892,7 +933,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
         batch.map(sym =>
           fetch(`${WORKER_URL}?symbol=${sym}`)
             .then(r => r.ok ? r.json() : null)
-            .catch(() => null)
+            .catch(e => { console.error('[fetch]', sym, e.message); return null; })
         )
       );
 
@@ -904,8 +945,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
       updateUI();
 
-      // 1.2s entre lotes para respeitar 60 req/min do Finnhub
-      // (5 req/lote × 50 lotes = ~60 seg total)
       if (i + PARALLEL < total) {
         await new Promise(r => setTimeout(r, 1200));
       }
