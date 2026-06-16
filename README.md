@@ -1,4 +1,3 @@
-[index (12).html](https://github.com/user-attachments/files/28979263/index.12.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -848,29 +847,29 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     function parseFMP(q) {
       if (!q || !q.symbol) return null;
       const s = {
-        symbol:      q.symbol,
-        name:        q.name         || q.symbol,
-        sector:      q.sector       || null,
-        price:       q.price        || 0,
-        change1d:    q.changesPercentage || 0,
-        marketCap:   q.marketCap    || 0,
-        pe:          q.pe           || null,
-        pb:          q.priceToBookRatio || null,
-        ps:          q.priceToSalesRatio || null,
-        evEbitda:    q.enterpriseValueMultiple || null,
-        roe:         q.returnOnEquityTTM  != null ? q.returnOnEquityTTM  / 100 : null,
-        roa:         q.returnOnAssetsTTM  != null ? q.returnOnAssetsTTM  / 100 : null,
+        symbol: q.symbol,
+        name: q.name || q.companyName || q.symbol,
+        sector: q.sector || 'Unknown',
+        price: Number(q.price) || 0,
+        change1d: Number(q.changesPercentage) || 0,
+        marketCap: Number(q.marketCap) || 0,
+        pe: q.pe ?? null,
+        pb: q.priceToBookRatio ?? null,
+        ps: q.priceToSalesRatio ?? null,
+        evEbitda: q.enterpriseValueMultiple ?? null,
+        roe: q.returnOnEquityTTM != null ? q.returnOnEquityTTM / 100 : null,
+        roa: q.returnOnAssetsTTM != null ? q.returnOnAssetsTTM / 100 : null,
         grossMargin: q.grossProfitMarginTTM != null ? q.grossProfitMarginTTM / 100 : null,
-        netMargin:   q.netProfitMarginTTM   != null ? q.netProfitMarginTTM  / 100 : null,
-        opMargin:    q.operatingProfitMarginTTM != null ? q.operatingProfitMarginTTM / 100 : null,
-        debtEq:      q.debtToEquityRatio    || null,
-        currentRatio:q.currentRatio         || null,
-        eps:         q.eps                  || null,
-        fcfPerShare: q.freeCashFlowPerShare  || null,
-        divYield:    q.dividendYield != null ? q.dividendYield / 100 : null,
-        avgVol:      q.avgVolume             || null,
-        peg:         q.pegRatio              || null,
-        growthRate:  q.revenueGrowthTTM != null ? q.revenueGrowthTTM / 100 : 0.08
+        netMargin: q.netProfitMarginTTM != null ? q.netProfitMarginTTM / 100 : null,
+        opMargin: q.operatingProfitMarginTTM != null ? q.operatingProfitMarginTTM / 100 : null,
+        debtEq: q.debtToEquityRatio ?? null,
+        currentRatio: q.currentRatio ?? null,
+        eps: q.eps ?? null,
+        fcfPerShare: q.freeCashFlowPerShare ?? null,
+        divYield: q.dividendYield != null ? q.dividendYield / 100 : null,
+        avgVol: q.avgVolume ?? q.volume ?? null,
+        peg: q.pegRatio ?? null,
+        growthRate: q.revenueGrowthTTM != null ? q.revenueGrowthTTM / 100 : 0.08
       };
       s.fairPrice = calcFair(s);
       return s;
@@ -899,7 +898,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
           progText.textContent = `Erro ${r.status}: ${text.slice(0, 100)}`;
           return [];
         }
-        const data = JSON.parse(text);
+        let data;\n        try { data = JSON.parse(text); } catch(e){ console.error('Resposta:',text); return []; }
         if (!Array.isArray(data)) {
           progText.textContent = `Resposta inesperada: ${text.slice(0, 100)}`;
           return [];
