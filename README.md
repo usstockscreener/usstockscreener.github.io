@@ -1,4 +1,4 @@
-[index (16).html](https://github.com/user-attachments/files/28979810/index.16.html)
+[index (17).html](https://github.com/user-attachments/files/28980018/index.17.html)
 <!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
@@ -828,7 +828,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
-    progText.textContent = 'Iniciando...';
+    progText.textContent = 'Conectando ao Finnhub...';
     progFill.style.width = '1%';
 
     function updateUI() {
@@ -843,41 +843,34 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       renderTable();
     }
 
-    // Parse do /quote da FMP — usa APENAS campos que realmente vêm no free plan
-    function parseQuote(d) {
-      if (!d?.symbol) return null;
-
-      // O DCF usa EPS e crescimento estimado
-      // EPS vem do /quote. Crescimento estimado baseado no setor
-      const eps = d.eps || null;
-      const pe  = d.pe  || null;
-
-      // Estimativa de crescimento pelo P/E (Graham): g ≈ (P/E - 8.5) / 2 / 100
-      // Se não tem P/E, usa 8% como padrão conservador
-      const growthRate = pe && pe > 8.5 ? Math.min((pe - 8.5) / 200, 0.30) : 0.08;
+    function parseStock(d) {
+      if (!d?.symbol || !d?.price) return null;
+      const growthRate = d.revenueGrowth != null
+        ? Math.min(Math.max(d.revenueGrowth, 0), 0.30)
+        : (d.pe && d.pe > 8.5 ? Math.min((d.pe - 8.5) / 200, 0.30) : 0.08);
 
       const s = {
         symbol:      d.symbol,
-        name:        d.name         || d.symbol,
-        sector:      d.sector       || null,
-        price:       d.price        || 0,
-        change1d:    d.changesPercentage || 0,
-        marketCap:   d.marketCap    || 0,
-        pe:          pe,
-        pb:          d.priceToBookRatio || null,
-        ps:          d.priceToSalesRatio || null,
-        evEbitda:    d.enterpriseValueMultiple || null,
-        roe:         null,
-        roa:         null,
-        grossMargin: null,
-        netMargin:   null,
-        opMargin:    null,
-        debtEq:      null,
-        currentRatio:null,
-        eps:         eps,
-        fcfPerShare: null,
-        divYield:    d.dividendYield ? d.dividendYield / 100 : null,
-        avgVol:      d.avgVolume    || null,
+        name:        d.name        || d.symbol,
+        sector:      d.sector      || null,
+        price:       d.price       || 0,
+        change1d:    d.change1d    || 0,
+        marketCap:   d.marketCap   || 0,
+        pe:          d.pe          || null,
+        pb:          d.pb          || null,
+        ps:          d.ps          || null,
+        evEbitda:    d.evEbitda    || null,
+        roe:         d.roe         || null,
+        roa:         d.roa         || null,
+        grossMargin: d.grossMargin || null,
+        netMargin:   d.netMargin   || null,
+        opMargin:    d.opMargin    || null,
+        debtEq:      d.debtEq      || null,
+        currentRatio:d.currentRatio|| null,
+        eps:         d.eps         || null,
+        fcfPerShare: d.fcfPerShare || null,
+        divYield:    d.divYield    || null,
+        avgVol:      d.avgVol      || null,
         peg:         null,
         growthRate:  growthRate,
       };
@@ -885,42 +878,44 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       return s;
     }
 
+    // Processa em lotes de 5 em paralelo (Finnhub: 60 req/min = 1/seg, 5 paralelo = seguro)
+    const PARALLEL = 5;
     const total = TICKERS.length;
-    let errors = 0;
 
-    for (let i = 0; i < total; i++) {
-      const sym = TICKERS[i];
-      const pct = Math.round(((i + 1) / total) * 100);
-      progText.textContent = `${i+1}/${total} — ${sym} — ${allData.length} carregadas`;
+    for (let i = 0; i < total; i += PARALLEL) {
+      const batch = TICKERS.slice(i, i + PARALLEL);
+      const pct   = Math.round((i / total) * 100);
+      progText.textContent = `${i+1}-${Math.min(i+PARALLEL,total)}/${total} — ${allData.length} carregadas`;
       progFill.style.width = Math.max(pct, 1) + '%';
 
-      try {
-        const r = await fetch(`${WORKER_URL}?symbol=${sym}`);
-        if (r.ok) {
-          const data = await r.json();
-          // /quote retorna array
-          const q = Array.isArray(data) ? data[0] : data;
-          const parsed = parseQuote(q);
-          if (parsed) {
-            allData.push(parsed);
-            if (allData.length % 10 === 0) updateUI();
-          }
-        } else {
-          errors++;
-          // Se muitos erros seguidos, provavelmente limite da FMP — para
-          if (errors > 5) {
-            progText.textContent = `Limite da API atingido após ${allData.length} empresas. Tente amanhã para mais.`;
-            break;
-          }
-        }
-      } catch(e) { errors++; }
+      const results = await Promise.all(
+        batch.map(sym =>
+          fetch(`${WORKER_URL}?symbol=${sym}`)
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+        )
+      );
+
+      for (const d of results) {
+        if (!d) continue;
+        const parsed = parseStock(d);
+        if (parsed) allData.push(parsed);
+      }
+
+      updateUI();
+
+      // 1.2s entre lotes para respeitar 60 req/min do Finnhub
+      // (5 req/lote × 50 lotes = ~60 seg total)
+      if (i + PARALLEL < total) {
+        await new Promise(r => setTimeout(r, 1200));
+      }
     }
 
     prog.style.display = 'none';
     updateUI();
     document.getElementById('s-updated').textContent =
       new Date().toLocaleTimeString('pt-BR') +
-      ` · ${allData.length} empresas ✓`;
+      ` · ${allData.length} empresas · Finnhub ✓`;
   }
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
   // Sem dados demo — carrega dados reais imediatamente
