@@ -340,7 +340,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
   <!-- Texto descritivo central -->
   <div style="padding:0 1.5rem 1rem 1.5rem;color:#7E8DB0;font-size:13px;line-height:1.8;border-bottom:1px solid #222C4A;margin-bottom:1rem">
-    <p>O <strong style="color:#E2E8F5">US Stock Screener</strong> Reúne indicadores fundamentalistas das 330 maiores empresas da bolsa americana — S&P 500 e NASDAQ. Compare P/L, P/VP, ROE, EV/EBITDA e margem líquida em tempo real. Cada ação recebe um <strong style="color:#E2E8F5">preço justo por DCF</strong> com termômetro visual de margem de segurança. Empresas analisadas: <strong style="color:#E2E8F5">Apple (AAPL), Microsoft (MSFT), NVIDIA (NVDA), Alphabet (GOOGL), Amazon (AMZN), Meta (META), Tesla (TSLA), JPMorgan (JPM), Johnson &amp; Johnson (JNJ), Berkshire Hathaway (BRK-B)</strong> e mais 320 empresas dos setores de tecnologia, saúde, finanças, energia e consumo.</p>
+    <p>O <strong style="color:#E2E8F5">US Stock Screener</strong> reúne indicadores fundamentalistas das 330 maiores empresas da bolsa americana — S&P 500 e NASDAQ. Compare P/L, P/VP, ROE, EV/EBITDA e margem líquida em tempo real. Cada ação recebe um <strong style="color:#E2E8F5">preço justo por DCF</strong> com termômetro visual de margem de segurança. Empresas analisadas: <strong style="color:#E2E8F5">Apple (AAPL), Microsoft (MSFT), NVIDIA (NVDA), Alphabet (GOOGL), Amazon (AMZN), Meta (META), Tesla (TSLA), JPMorgan (JPM), Johnson &amp; Johnson (JNJ), Berkshire Hathaway (BRK-B)</strong> e mais 320 empresas dos setores de tecnologia, saúde, finanças, energia e consumo.</p>
   </div>
 
   <!-- ██████████  CONTROLES  ██████████ -->
@@ -481,6 +481,91 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   <!-- ██████████  JAVASCRIPT  ██████████ -->
   <script>
   // ─── TICKERS (100 maiores S&P500) ───────────────────────────────────────────
+  // Nomes das empresas (evita chamada ao /profile)
+  const COMPANY_NAMES = {
+    'NVDA':'NVIDIA Corp','AAPL':'Apple Inc','MSFT':'Microsoft Corp','GOOGL':'Alphabet Inc',
+    'AMZN':'Amazon.com Inc','META':'Meta Platforms','TSLA':'Tesla Inc','BRK-B':'Berkshire Hathaway',
+    'AVGO':'Broadcom Inc','JPM':'JPMorgan Chase','LLY':'Eli Lilly','V':'Visa Inc',
+    'UNH':'UnitedHealth Group','XOM':'Exxon Mobil','MA':'Mastercard Inc','JNJ':'Johnson & Johnson',
+    'PG':'Procter & Gamble','COST':'Costco Wholesale','HD':'Home Depot','ABBV':'AbbVie Inc',
+    'MRK':'Merck & Co','BAC':'Bank of America','NFLX':'Netflix Inc','CRM':'Salesforce Inc',
+    'CVX':'Chevron Corp','ORCL':'Oracle Corp','AMD':'Advanced Micro Devices','ADBE':'Adobe Inc',
+    'KO':'Coca-Cola Co','WMT':'Walmart Inc','PEP':'PepsiCo Inc','CSCO':'Cisco Systems',
+    'TMO':'Thermo Fisher','ACN':'Accenture plc','MCD':'McDonald's Corp','ABT':'Abbott Labs',
+    'LIN':'Linde plc','TXN':'Texas Instruments','DHR':'Danaher Corp','NKE':'Nike Inc',
+    'WFC':'Wells Fargo','PM':'Philip Morris','NEE':'NextEra Energy','INTC':'Intel Corp',
+    'AMGN':'Amgen Inc','IBM':'IBM Corp','QCOM':'Qualcomm Inc','INTU':'Intuit Inc',
+    'RTX':'RTX Corp','CAT':'Caterpillar Inc','HON':'Honeywell Intl','SPGI':'S&P Global',
+    'GS':'Goldman Sachs','BKNG':'Booking Holdings','AXP':'American Express','LOW':'Lowe's Cos',
+    'UPS':'United Parcel Service','ELV':'Elevance Health','PLD':'Prologis Inc','MS':'Morgan Stanley',
+    'VRTX':'Vertex Pharma','GILD':'Gilead Sciences','MDT':'Medtronic plc','T':'AT&T Inc',
+    'DE':'Deere & Co','AMAT':'Applied Materials','SCHW':'Charles Schwab','ADI':'Analog Devices',
+    'REGN':'Regeneron Pharma','CI':'Cigna Group','ISRG':'Intuitive Surgical','MU':'Micron Technology',
+    'LRCX':'Lam Research','SYK':'Stryker Corp','BX':'Blackstone Inc','CB':'Chubb Ltd',
+    'ETN':'Eaton Corp','KLAC':'KLA Corp','ZTS':'Zoetis Inc','C':'Citigroup Inc',
+    'PGR':'Progressive Corp','MO':'Altria Group','MMC':'Marsh McLennan','BSX':'Boston Scientific',
+    'HCA':'HCA Healthcare','TJX':'TJX Companies','SO':'Southern Co','DUK':'Duke Energy',
+    'BDX':'Becton Dickinson','NOW':'ServiceNow Inc','AON':'Aon plc','SLB':'Schlumberger',
+    'GE':'GE Aerospace','CME':'CME Group','MDLZ':'Mondelez Intl','PANW':'Palo Alto Networks',
+    'SNPS':'Synopsys Inc','CDNS':'Cadence Design','EOG':'EOG Resources','F':'Ford Motor',
+    'GM':'General Motors','MAR':'Marriott Intl','PCAR':'PACCAR Inc','ODFL':'Old Dominion Freight',
+    'CTAS':'Cintas Corp','AFL':'Aflac Inc','STZ':'Constellation Brands','AZO':'AutoZone Inc',
+    'TDG':'TransDigm Group','IDXX':'Idexx Laboratories','ROST':'Ross Stores','EW':'Edwards Lifesciences',
+    'CTVA':'Corteva Inc','TEL':'TE Connectivity','VRSK':'Verisk Analytics','MNST':'Monster Beverage',
+    'CARR':'Carrier Global','OTIS':'Otis Worldwide','PWR':'Quanta Services','BIIB':'Biogen Inc',
+    'MSI':'Motorola Solutions','DXCM':'DexCom Inc','GEHC':'GE HealthCare','LHX':'L3Harris Technologies',
+    'KEYS':'Keysight Technologies','EXC':'Exelon Corp','PAYX':'Paychex Inc','GIS':'General Mills',
+    'SRE':'Sempra Energy','D':'Dominion Energy','IQV':'IQVIA Holdings','ON':'ON Semiconductor',
+    'EA':'Electronic Arts','HAL':'Halliburton Co','FAST':'Fastenal Co','ACGL':'Arch Capital',
+    'HES':'Hess Corp','KR':'Kroger Co','CPRT':'Copart Inc','EBAY':'eBay Inc',
+    'TROW':'T. Rowe Price','DLTR':'Dollar Tree','IR':'Ingersoll Rand','VMC':'Vulcan Materials',
+    'MLM':'Martin Marietta','GWW':'W.W. Grainger','CHD':'Church & Dwight','ZBRA':'Zebra Technologies',
+    'IRM':'Iron Mountain','TER':'Teradyne Inc','VLO':'Valero Energy','MPC':'Marathon Petroleum',
+    'PSX':'Phillips 66','XEL':'Xcel Energy','WAT':'Waters Corp','TFC':'Truist Financial',
+    'MTD':'Mettler-Toledo','FTV':'Fortive Corp','BR':'Broadridge Financial','ROK':'Rockwell Automation',
+    'ICE':'Intercontinental Exchange','COF':'Capital One Financial','USB':'U.S. Bancorp',
+    'PNC':'PNC Financial','TRV':'Travelers Companies','ALL':'Allstate Corp','MET':'MetLife Inc',
+    'PRU':'Prudential Financial','GL':'Globe Life','AIZ':'Assurant Inc','LNC':'Lincoln National',
+    'RGA':'Reinsurance Group','UNM':'Unum Group','FNF':'Fidelity National Financial',
+    'FAF':'First American Financial','CINF':'Cincinnati Financial','PFG':'Principal Financial',
+    'ERIE':'Erie Indemnity','HIG':'Hartford Financial','BMY':'Bristol-Myers Squibb',
+    'ILMN':'Illumina Inc','ALGN':'Align Technology','HOLX':'Hologic Inc','TECH':'Bio-Techne',
+    'RMD':'ResMed Inc','COO':'Cooper Companies','BAX':'Baxter International','BIO':'Bio-Rad Labs',
+    'HSIC':'Henry Schein','DVA':'DaVita Inc','UHS':'Universal Health Services','HUM':'Humana Inc',
+    'MOH':'Molina Healthcare','CNC':'Centene Corp','CVS':'CVS Health','WBA':'Walgreens Boots',
+    'MCK':'McKesson Corp','CAH':'Cardinal Health','ABC':'AmerisourceBergen','ENPH':'Enphase Energy',
+    'SEDG':'SolarEdge Technologies','MPWR':'Monolithic Power','GNRC':'Generac Holdings',
+    'TDY':'Teledyne Technologies','PODD':'Insulet Corp','QRVO':'Qorvo Inc','SWKS':'Skyworks Solutions',
+    'MCHP':'Microchip Technology','FTNT':'Fortinet Inc','CTSH':'Cognizant Technology',
+    'INFY':'Infosys Ltd','WIT':'Wipro Ltd','EPAM':'EPAM Systems','GLOB':'Globant SA',
+    'PEGA':'Pegasystems Inc','MANH':'Manhattan Associates','VEEV':'Veeva Systems',
+    'ANSS':'ANSYS Inc','PTC':'PTC Inc','TTWO':'Take-Two Interactive','ATVI':'Activision Blizzard',
+    'NTDOY':'Nintendo Co','COP':'ConocoPhillips','OXY':'Occidental Petroleum','DVN':'Devon Energy',
+    'FANG':'Diamondback Energy','APA':'APA Corp','MRO':'Marathon Oil','PXD':'Pioneer Natural Resources',
+    'BKR':'Baker Hughes','NOV':'NOV Inc','RIG':'Transocean Ltd','PTEN':'Patterson-UTI Energy',
+    'SBUX':'Starbucks Corp','CMG':'Chipotle Mexican Grill','YUM':'Yum! Brands','QSR':'Restaurant Brands',
+    'DPZ':'Domino's Pizza','DRI':'Darden Restaurants','TGT':'Target Corp','DG':'Dollar General',
+    'FIVE':'Five Below','KR':'Kroger Co','SFM':'Sprouts Farmers Market','BA':'Boeing Co',
+    'LMT':'Lockheed Martin','NOC':'Northrop Grumman','GD':'General Dynamics','TXT':'Textron Inc',
+    'HII':'Huntington Ingalls','LDOS':'Leidos Holdings','EMR':'Emerson Electric','PH':'Parker Hannifin',
+    'ITW':'Illinois Tool Works','AME':'AMETEK Inc','XYL':'Xylem Inc','DOV':'Dover Corp',
+    'EXPD':'Expeditors Intl','CHRW':'C.H. Robinson','JBHT':'J.B. Hunt Transport','NUE':'Nucor Corp',
+    'STLD':'Steel Dynamics','ALB':'Albemarle Corp','LYB':'LyondellBasell','AMT':'American Tower',
+    'CCI':'Crown Castle Inc','EQIX':'Equinix Inc','WELL':'Welltower Inc','PSA':'Public Storage',
+    'DLR':'Digital Realty','O':'Realty Income','SPG':'Simon Property Group','EXR':'Extra Space Storage',
+    'AVB':'AvalonBay Communities','EQR':'Equity Residential','RDOR':'Rede D'Or','HAPV':'Hapvida',
+    'QUAL':'Qualicorp','PARD':'Pardini','PDCO':'Patterson Companies','PRGO':'Perrigo Co',
+    'JACK':'Jack in the Box','WING':'Wingstop Inc','TXRH':'Texas Roadhouse','EAT':'Brinker Intl',
+    'OLLI':'Ollie's Bargain Outlet','ACI':'Albertsons Companies','KTOS':'Kratos Defense',
+    'AJRD':'Aerojet Rocketdyne','HZNP':'Horizon Therapeutics','JAZZ':'Jazz Pharmaceuticals',
+    'BHC':'Bausch Health','MNK':'Mallinckrodt plc','ENDP':'Endo International',
+    'DASA':'Diagnósticos da América','FLRY':'Fleury SA','ONCO':'Oncoclínicas',
+    'MATD':'Mater Dei Saúde','BLAU':'Blau Farmacêutica','CRMV':'CRM','ODPV':'Odontoprev',
+    'AALR':'Alliar','PGMN':'Pegasus','SEER':'Seer Inc','WOR':'Worthington Industries',
+    'ATI':'ATI Inc','RS':'Reliance Steel','CMC':'Commercial Metals','CHRW':'C.H. Robinson',
+    'DASN':'Dasan','ALTR':'Altair Engineering','GLUU':'Glu Mobile',
+  };
+
   const TICKERS = [
     // Mega caps
     'AAPL','MSFT','NVDA','GOOGL','AMZN','META','TSLA','BRK-B','AVGO','JPM',
@@ -870,7 +955,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
         : (d.pe && d.pe > 8.5 ? Math.min((d.pe - 8.5) / 200, 0.30) : 0.08);
       const s = {
         symbol:      d.symbol,
-        name:        d.name        || d.symbol,
+        name:        COMPANY_NAMES[d.symbol] || d.name || d.symbol,
         sector:      d.sector      || null,
         price:       d.price       || 0,
         change1d:    d.change1d    || 0,
