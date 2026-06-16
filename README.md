@@ -1,5 +1,4 @@
-[index (19).html](https://github.com/user-attachments/files/28980474/index.19.html)
-<!DOCTYPE html>
+[index (20).html](https://github.com/user-attachments/files/28980575/index.20.html)<!DOCTYPE html>
 <html lang="pt-BR" style="background:#1a2744">
 <head>
   <meta charset="UTF-8">
@@ -828,7 +827,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     const progText = document.getElementById('load-progress-text');
     const progFill = document.getElementById('load-progress-fill');
     prog.style.display = 'block';
-    progText.textContent = 'Testando worker...';
+    progText.textContent = 'Conectando...';
     progFill.style.width = '1%';
 
     function updateUI() {
@@ -843,60 +842,18 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
       renderTable();
     }
 
-    // Testa AAPL primeiro e loga resposta completa
-    try {
-      const testR = await fetch(`${WORKER_URL}?symbol=AAPL`);
-      const testText = await testR.text();
-      console.log('[Worker] status:', testR.status);
-      console.log('[Worker] resposta AAPL:', testText.slice(0, 500));
-
-      if (!testR.ok) {
-        progText.textContent = `Worker erro ${testR.status}: ${testText.slice(0,100)}`;
-        prog.style.background = '#2B1212';
-        return;
-      }
-
-      let testData;
-      try { testData = JSON.parse(testText); } catch(e) {
-        progText.textContent = 'Resposta inválida: ' + testText.slice(0,100);
-        return;
-      }
-
-      console.log('[Worker] dados parseados:', JSON.stringify(testData));
-
-      if (!testData.price && testData.price !== 0) {
-        progText.textContent = 'Worker OK mas sem campo price. Ver console F12.';
-        console.error('[Worker] campos recebidos:', Object.keys(testData));
-        return;
-      }
-
-      progText.textContent = `Conectado! AAPL $${testData.price} — carregando...`;
-    } catch(e) {
-      progText.textContent = 'Erro ao conectar: ' + e.message;
-      console.error('[Worker] erro:', e);
-      return;
-    }
-
     function parseStock(d) {
-      if (!d || !d.symbol) {
-        console.warn('[parse] ignorado — sem symbol');
-        return null;
-      }
-      // Aceita price=0 (mercado fechado) — mostra dados fundamentalistas mesmo sem preço ao vivo
-      if (!d.price && d.price !== 0) {
-        console.warn('[parse] ignorado:', d.symbol, '— sem campo price');
-        return null;
-      }
+      if (!d || !d.symbol) return null;
 
-      const growthRate = d.revenueGrowth != null && d.revenueGrowth !== 0
-        ? Math.min(Math.max(d.revenueGrowth, 0), 0.30)
+      const growthRate = (d.revenueGrowth != null && d.revenueGrowth > 0)
+        ? Math.min(d.revenueGrowth, 0.30)
         : (d.pe && d.pe > 8.5 ? Math.min((d.pe - 8.5) / 200, 0.30) : 0.08);
 
       const s = {
         symbol:      d.symbol,
         name:        d.name        || d.symbol,
         sector:      d.sector      || null,
-        price:       d.price,
+        price:       d.price       || 0,
         change1d:    d.change1d    || 0,
         marketCap:   d.marketCap   || 0,
         pe:          d.pe          || null,
@@ -927,19 +884,19 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     for (let i = 0; i < total; i += PARALLEL) {
       const batch = TICKERS.slice(i, i + PARALLEL);
       const pct   = Math.round((i / total) * 100);
-      progText.textContent = `${i+1}-${Math.min(i+PARALLEL,total)}/${total} — ${allData.length} carregadas`;
+      progText.textContent = `${i+1}–${Math.min(i+PARALLEL,total)}/${total} — ${allData.length} carregadas`;
       progFill.style.width = Math.max(pct, 1) + '%';
 
       const results = await Promise.all(
         batch.map(sym =>
           fetch(`${WORKER_URL}?symbol=${sym}`)
             .then(r => r.ok ? r.json() : null)
-            .catch(e => { console.error('[fetch]', sym, e.message); return null; })
+            .catch(() => null)
         )
       );
 
       for (const d of results) {
-        if (!d) continue;
+        if (!d || !d.symbol) continue;
         const parsed = parseStock(d);
         if (parsed) allData.push(parsed);
       }
@@ -954,8 +911,7 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
     prog.style.display = 'none';
     updateUI();
     document.getElementById('s-updated').textContent =
-      new Date().toLocaleTimeString('pt-BR') +
-      ` · ${allData.length} empresas · Finnhub ✓`;
+      new Date().toLocaleTimeString('pt-BR') + ` · ${allData.length} empresas · Finnhub ✓`;
   }
   // ─── AUTO-CARREGA AS 10 MAIORES AO ABRIR ───────────────────────────────────
   // Sem dados demo — carrega dados reais imediatamente
@@ -965,3 +921,4 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   </script>
 </body>
 </html>
+
