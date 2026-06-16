@@ -943,8 +943,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
   // ─── CARREGAR DADOS REAIS (YAHOO FINANCE) ───────────────────────────────────
   async function loadData() {
     const WORKER_URL = 'https://frosty-flower-1533.calheirospereira2.workers.dev';
-    const CACHE_KEY  = 'us_screener_cache';
-    const CACHE_TTL  = 60 * 60 * 1000; // 1 hora em ms
 
     allData = [];
     currentPage = 1;
@@ -962,23 +960,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
         allData.length + ' / ' + TICKERS.length + ' empresas';
       renderTable();
     }
-
-    // Tenta carregar do cache primeiro
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { ts, data } = JSON.parse(cached);
-        if (Date.now() - ts < CACHE_TTL && data.length > 0) {
-          allData = data.map(s => { s.fairPrice = calcFair(s); return s; });
-          currentPage = 1;
-          updateUI();
-          document.getElementById('s-updated').textContent =
-            new Date(ts).toLocaleTimeString('pt-BR') + \` · \${allData.length} empresas · cache ✓\`;
-          return;
-        }
-      }
-    } catch(e) {}
-
 
     function parseStock(d) {
       if (!d || !d.symbol) return null;
@@ -1040,11 +1021,6 @@ input[type=text], select { background-color: #243460 !important; color: #E2E8F5 
 
     prog.style.display = 'none';
     updateUI();
-    // Salva no cache
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: allData }));
-    } catch(e) {}
-
     document.getElementById('s-updated').textContent =
       new Date().toLocaleTimeString('pt-BR') + ` · ${allData.length} empresas · Finnhub ✓`;
   }
